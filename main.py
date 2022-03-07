@@ -11,7 +11,7 @@ import sys
 import pymongo
 from matplotlib import pyplot as plt
 
-client = pymongo.MongoClient()
+client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 db = client["InvManager"]
 Inventory = db["Inventory"]
 Stats = db["StatsTime"]  # Used in determining stats over time for the inventory
