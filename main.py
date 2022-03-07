@@ -222,7 +222,6 @@ def testGraphs():
 
 
 if __name__ == '__main__':
-    loop = True
     print("Welcome to INVENTORY MANAGER testing.")
     while True:
         print("\nWhat would you like to do?")
