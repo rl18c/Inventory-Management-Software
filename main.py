@@ -9,7 +9,7 @@ import numpy
 import pandas
 
 
-client = pymongo.MongoClient()
+client = pymongo.MongoClient('mongodb+srv://pygroup:rcagroup@cluster0.uxruw.mongodb.net/Cluster0?ssl=true&ssl_cert_reqs=CERT_NONE&retryWrites=true&w=majority')
 db = client["InvManager"]
 collection = db["Inventory"]
 
