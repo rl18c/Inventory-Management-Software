@@ -7,7 +7,7 @@
 # Tertiary DB (NameBcode) stores data in the form: name:string, barcode:string
 import datetime
 import random
-
+import sys
 import pymongo
 from matplotlib import pyplot as plt
 
@@ -114,33 +114,65 @@ def sortDat():
     print("What would you like to sort by?")
     sort = input("(N)ame, (B)arcode, (Q)uantity, (P)rice:").lower()
     asOdes = input("(A)scending or (D)escending order:").lower()
-
+    j = 0
     if sort == "n":
         if asOdes == "a":
-            return Inventory.find().sort("name")
+            sorted  = Inventory.find().sort("name")
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         elif asOdes == "d":
-            return Inventory.find().sort("name", -1)
+            sorted = Inventory.find().sort("name", -1)
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         else:
             print("Error: invalid input for Ascending/Descending.")
     elif sort == "b":
         if asOdes == "a":
-            return Inventory.find().sort("barcode")
+            sorted = Inventory.find().sort("barcode")
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         elif asOdes == "d":
-            return Inventory.find().sort("barcode", -1)
+            sorted = Inventory.find().sort("barcode", -1)
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         else:
             print("Error: invalid input for Ascending/Descending.")
     elif sort == "q":
         if asOdes == "a":
-            return Inventory.find().sort("quantity")
+            sorted = Inventory.find().sort("quantity")
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         elif asOdes == "d":
-            return Inventory.find().sort("quantity", -1)
+            sorted = Inventory.find().sort("quantity", -1)
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         else:
             print("Error: invalid input for Ascending/Descending.")
     elif sort == "p":
         if asOdes == "a":
-            return Inventory.find().sort("price")
+            sorted = Inventory.find().sort("price")
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         elif asOdes == "d":
-            return Inventory.find().sort("price", -1)
+            sorted = Inventory.find().sort("price", -1)
+            for i in sorted:
+                j += 1
+                print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                      + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
         else:
             print("Error: invalid input for Ascending/Descending.")
     else:
@@ -192,7 +224,7 @@ def testGraphs():
 if __name__ == '__main__':
     loop = True
     print("Welcome to INVENTORY MANAGER testing.")
-    while loop is True:
+    while True:
         print("\nWhat would you like to do?")
         print("P: Print data")
         print("A: Add data")
@@ -239,7 +271,7 @@ if __name__ == '__main__':
             result = delDat()
 
         elif inp == "s":
-            result = sortDat()
+            sortDat()
 
         elif inp == "q":
             result = editQuan()
@@ -259,6 +291,6 @@ if __name__ == '__main__':
             testGraphs()
 
         elif inp == "x":
-            loop = False
+            sys.exit()
         else:
             print(inp + " = Invalid input. Try again.")
