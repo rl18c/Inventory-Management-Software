@@ -10,6 +10,8 @@ import random
 import sys
 import pymongo
 from matplotlib import pyplot as plt
+import tkinter as tk
+from tkinter import *
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 db = client["InvManager"]
@@ -221,7 +223,217 @@ def testGraphs():
     clearDat()
 
 
+class UI(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("640x600")
+        self.title("Inventory Manager")
+        self.resizable(0, 0)
+
+        self.columnconfigure(0, weight=3)
+        self.columnconfigure(1, weight=1)
+        self.initialize_components()
+
+    def initialize_components(self):
+        # Title Label
+        title_label = Label(self, text="Choose Option")
+        title_label.grid(columnspan=2)
+
+        # Show Inventory Button
+        show_butt = Button(self, text="Show Inventory", command=self.inv_show)
+        show_butt.grid(column=0, row=1)
+
+        # Edit Data Button
+        add_butt = Button(self, text="Add to Inventory", command=self.inv_add)
+        add_butt.grid(column=0, row=2)
+
+        # Close Window Button
+        close_butt = Button(self, text="Close Manager", command=self.close_main)
+        close_butt.grid(column=0, row=3)
+
+    def inv_show(self):
+        # This is where we must open new window to edit Inventory DB
+        edit = Toplevel(self)
+
+        edit.title("Data Modification")
+        edit.geometry("200x200")
+
+        def inv():
+            output = ""
+            res = getDat(Inventory)
+            j = 0
+            for i in res:
+                j += 1
+                output += ("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
+                           + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']) + "\n")
+
+            tk.messagebox.showinfo(
+                title='Inventory',
+                message=output
+            )
+
+
+        def stat():
+            output = ""
+            res = getDat(Stats)
+            j = 0
+            for i in res:
+                j += 1
+                output += ("[" + str(j) + "] " + "Barcode: " + i['barcode'] + ", Time: " + str(i['time'])
+                          + ", Quantity: " + str(i['quantity']) + "\n")
+
+
+            tk.messagebox.showinfo(
+                title='Statistics',
+                message=output
+            )
+
+
+        def barcode():
+            output = ""
+            res = getDat(NameBcode)
+            j = 0
+            for i in res:
+                j += 1
+                output += ("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode'] + "\n")
+
+            tk.messagebox.showinfo(
+                title='Barcodes',
+                message=output
+            )
+
+        # Add Label and Button to EDIT window
+        mod_label = Label(edit, text="Which database Would you like to view?").grid(row=0)
+        # out = Label(edit, text=output).grid(row=1)
+        inv_butt = Button(edit, text="Inventory", command=lambda: inv())
+        inv_butt.grid(row=1)
+        stat_butt = Button(edit, text="Statistics", command=lambda: stat())
+        stat_butt.grid(row=2)
+        bcode_butt = Button(edit, text="Barcodes", command=lambda: barcode())
+        bcode_butt.grid(row=3)
+        back_butt = Button(edit, text="Go Back", command=lambda: self.close_edit(edit))
+        back_butt.grid(row=4)
+
+        # Hides Original window while modifying
+        self.withdraw()
+
+
+    def inv_add(self):
+        # This is where we must open new window to edit Inventory DB
+        edit = Toplevel(self)
+
+        edit.title("Data Modification")
+        edit.geometry("200x200")
+
+        name = tk.StringVar()
+        barcode = tk.StringVar()
+        quantity = tk.StringVar()
+        price = tk.StringVar()
+
+        def submit_clicked():
+            n = name.get()
+            b = barcode.get()
+            q = int(quantity.get())
+            p = float(price.get())
+            x = Inventory.find_one({"name": n})
+            if x:
+                nameF = tk.messagebox.askquestion\
+                    ('Name Found','Entry with name ' + n + ' found. Update it?')
+                if nameF:
+                    Inventory.update_one({"name": n}, {"$set": {"name": n, "barcode": b,
+                                                                          "quantity": q,
+                                                                          "price": p}})
+            y = Inventory.find_one({"barcode": b})
+            if y and not x:
+                nameB = tk.messagebox.askquestion \
+                    ('Barcode Found', 'Entry with barcode ' + b + ' found. Update it?')
+                if nameB:
+                    Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b,
+                                                                              "quantity": q,
+                                                                              "price": p}})
+            z = NameBcode.find_one({"barcode": b})
+            if not z:
+                nameBU = tk.messagebox.askquestion \
+                    ('Unique Barcode Found', 'Unique barcode found. Update unique database?')
+                if nameBU:
+                    NameBcode.insert_one({"name": n, "barcode": b})
+            else:
+                if z["name"] != n:
+                    nameBA = tk.messagebox.askquestion \
+                        ('Unique Barcode Already Used',
+                         'Unique barcode already used. Update unique and statistics database?')
+                    if nameBA:
+                        NameBcode.update_one({"barcode": b},{"$set": {"name": n, "barcode": b}})
+                        Stats.delete_many({"barcode": b})
+            if not x and not y:
+
+                Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "price": p})
+
+            Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q})
+
+            tk.messagebox.showinfo(
+                title='Success',
+                 message="Value Successfully inserted!"
+            )
+            name_entry.delete(0, END)
+            barc_entry.delete(0, END)
+            quan_entry.delete(0, END)
+            price_entry.delete(0, END)
+
+
+        # name
+        name_label = Label(edit, text="Product Name:")
+        name_label.pack(fill='x', expand=True)
+
+        name_entry = Entry(edit, textvariable=name)
+        name_entry.pack(fill='x', expand=True)
+        name_entry.focus()
+
+        # barcode
+        barc_label = Label(edit, text="Product Barcode:")
+        barc_label.pack(fill='x', expand=True)
+
+        barc_entry = Entry(edit, textvariable=barcode)
+        barc_entry.pack(fill='x', expand=True)
+
+        # quantity
+        quan_label = Label(edit, text="Product Quantity:")
+        quan_label.pack(fill='x', expand=True)
+
+        quan_entry = Entry(edit, textvariable=quantity)
+        quan_entry.pack(fill='x', expand=True)
+
+        # price
+        price_label = Label(edit, text="Product Price:")
+        price_label.pack(fill='x', expand=True)
+
+        price_entry = Entry(edit, textvariable=price)
+        price_entry.pack(fill='x', expand=True)
+
+        subm_butt = Button(edit, text="Submit", command=lambda: submit_clicked())
+        subm_butt.pack(fill='x', expand=True)
+
+        back_butt = Button(edit, text="Go Back", command=lambda: self.close_edit(edit))
+        back_butt.pack(fill='x', expand=True)
+
+        # Hides Original window while modifying
+        self.withdraw()
+
+    # Function used by EDIT's 'Go Back' button to close current and open original
+    def close_edit(self, win):
+        win.destroy()
+        self.deiconify()
+
+    def close_main(self):
+        self.destroy()
+
+    def greet(self):
+        print("Greetings!")
+
+
 if __name__ == '__main__':
+    window = UI()
+    window.mainloop()
     print("Welcome to INVENTORY MANAGER testing.")
     while True:
         print("\nWhat would you like to do?")
