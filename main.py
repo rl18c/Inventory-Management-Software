@@ -226,30 +226,72 @@ def testGraphs():
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("640x600")
+        self.geometry("500x220")
         self.title("Inventory Manager")
-        self.resizable(0, 0)
+        self.resizable(False, False)
+        self.configure(bg="#d0fbff")
 
-        self.columnconfigure(0, weight=3)
-        self.columnconfigure(1, weight=1)
+        # Initializes label and buttons on main screen
         self.initialize_components()
+
+        col, row = self.grid_size()
+        for c in range(col):
+            self.grid_columnconfigure(c, minsize=100)
 
     def initialize_components(self):
         # Title Label
-        title_label = Label(self, text="Choose Option")
-        title_label.grid(columnspan=2)
+        title_label = Label(self, text="Select an Action",
+                            bg="#d0fbff",
+                            fg="#9e5f00",
+                            font=("Helvetica", 16))
+        title_label.grid(row=0, column=1, columnspan=3, sticky=EW, pady=10)
+
+        # HERE WE DEFINE 4 FRAMES TO ACT AS BUTTON BORDERS
+        # Button Frame 1
+        but1_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        but1_border.grid(column=0, row=1, columnspan=2, sticky=W, padx=25, pady=10)
+        # Button Frame 2
+        but2_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        but2_border.grid(column=0, row=3, columnspan=2, sticky=W, padx=25, pady=10)
+        # Button Frame 3
+        but3_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        but3_border.grid(column=0, row=5, columnspan=2, sticky=W, padx=25, pady=10)
+        # Button Frame 4
+        but4_border = Frame(self, highlightthickness=2, highlightbackground="#d10000")
+        but4_border.grid(column=3, row=5, columnspan=2, padx=25)
+
+        # Add Data Button
+        add_butt = Button(but1_border, text="Add to Inventory",
+                           bg="white",
+                           borderwidth=0,
+                           font=("Helvetica", 11),
+                           command=self.inv_add)
+        add_butt.grid()
+        add_butt.config(width=18)
 
         # Show Inventory Button
-        show_butt = Button(self, text="Show Inventory", command=self.inv_show)
-        show_butt.grid(column=0, row=1)
+        show_butt = Button(but2_border, text="Show Inventory",
+                           bg="white",
+                           font=("Helvetica", 11),
+                           borderwidth=0)
+        show_butt.grid()
+        show_butt.config(width=18)
 
-        # Edit Data Button
-        add_butt = Button(self, text="Add to Inventory", command=self.inv_add)
-        add_butt.grid(column=0, row=2)
+        # Statistics Button for now
+        stat_butt = Button(but3_border, text="Show Inventory", command=self.inv_show,
+                           bg="white",
+                           font=("Helvetica", 11),
+                           borderwidth=0)
+        stat_butt.grid()
+        stat_butt.config(width=18)
 
         # Close Window Button
-        close_butt = Button(self, text="Close Manager", command=self.close_main)
-        close_butt.grid(column=0, row=3)
+        close_butt = Button(but4_border, text="Close Manager",
+                            bg="white",
+                            font=("Helvetica", 11),
+                            command=self.close_main,
+                            borderwidth=0)
+        close_butt.grid()
 
     def inv_show(self):
         # This is where we must open new window to edit Inventory DB
@@ -317,18 +359,14 @@ class UI(tk.Tk):
         # Hides Original window while modifying
         self.withdraw()
 
-
     def inv_add(self):
+        print("Accessing Inventory...")
+        
+        # Hides Original window while modifying
+        self.withdraw()
+        
         # This is where we must open new window to edit Inventory DB
-        edit = Toplevel(self)
-
-        edit.title("Data Modification")
-        edit.geometry("200x200")
-
-        name = tk.StringVar()
-        barcode = tk.StringVar()
-        quantity = tk.StringVar()
-        price = tk.StringVar()
+        addn = AddNew(self)
 
         def submit_clicked():
             n = name.get()
@@ -380,55 +418,112 @@ class UI(tk.Tk):
             quan_entry.delete(0, END)
             price_entry.delete(0, END)
 
-
-        # name
-        name_label = Label(edit, text="Product Name:")
-        name_label.pack(fill='x', expand=True)
-
-        name_entry = Entry(edit, textvariable=name)
-        name_entry.pack(fill='x', expand=True)
-        name_entry.focus()
-
-        # barcode
-        barc_label = Label(edit, text="Product Barcode:")
-        barc_label.pack(fill='x', expand=True)
-
-        barc_entry = Entry(edit, textvariable=barcode)
-        barc_entry.pack(fill='x', expand=True)
-
-        # quantity
-        quan_label = Label(edit, text="Product Quantity:")
-        quan_label.pack(fill='x', expand=True)
-
-        quan_entry = Entry(edit, textvariable=quantity)
-        quan_entry.pack(fill='x', expand=True)
-
-        # price
-        price_label = Label(edit, text="Product Price:")
-        price_label.pack(fill='x', expand=True)
-
-        price_entry = Entry(edit, textvariable=price)
-        price_entry.pack(fill='x', expand=True)
-
-        subm_butt = Button(edit, text="Submit", command=lambda: submit_clicked())
-        subm_butt.pack(fill='x', expand=True)
-
-        back_butt = Button(edit, text="Go Back", command=lambda: self.close_edit(edit))
-        back_butt.pack(fill='x', expand=True)
-
-        # Hides Original window while modifying
-        self.withdraw()
-
-    # Function used by EDIT's 'Go Back' button to close current and open original
-    def close_edit(self, win):
-        win.destroy()
-        self.deiconify()
-
     def close_main(self):
         self.destroy()
 
-    def greet(self):
-        print("Greetings!")
+
+class AddNew(tk.Tk):
+    def __init__(self, mas):
+        super().__init__()
+        self.main_window = mas
+        self.configure(bg="#d0fbff")
+        self.title("New Item")
+        self.geometry("330x300")
+        self.resizable(False, False)
+
+        # Creating 4 string variables for text box values
+        self.n_str = StringVar(self)
+        self.b_str = StringVar(self)
+        self.q_str = StringVar(self)
+        self.p_str = StringVar(self)
+
+        # Create frame to hold content of window
+        b_frame = Frame(self)
+        b_frame.grid(column=0, row=0, columnspan=5, rowspan=17, padx=25)
+        b_frame.configure(bg="#d0fbff")
+
+        # Title Label
+        t_lbl = Label(b_frame, text="New Item Form",
+                      font=("Helvetica", 16),
+                      borderwidth=2,
+                      relief="ridge",
+                      bg="#d0fbff")
+        t_lbl.grid(row=0, column=1, rowspan=2, columnspan=3, pady=15, sticky=W)
+
+        # Create 4 labels for entry boxes
+        n_lbl = Label(b_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        n_lbl.grid(row=2, column=0, sticky=E)
+        b_lbl = Label(b_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        b_lbl.grid(row=5, column=0, sticky=E)
+        q_lbl = Label(b_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        q_lbl.grid(row=8, column=0, sticky=E)
+        p_lbl = Label(b_frame, text="Price >", font=("Helvetica", 11), bg="#d0fbff")
+        p_lbl.grid(row=11, column=0, sticky=E)
+
+        # Every time any entry text is changed,
+        # check if all entry boxes have content (If they do enable add button)
+        self.n_str.trace("w", self.ok_to_add)
+        self.b_str.trace("w", self.ok_to_add)
+        self.q_str.trace("w", self.ok_to_add)
+        self.p_str.trace("w", self.ok_to_add)
+
+        # Creating 4 entry boxes (Name - Barcode - Quantity - Price)
+        n_entry = Entry(b_frame, textvariable=self.n_str)
+        n_entry.grid(row=2, column=1, columnspan=4, pady=15)
+        b_entry = Entry(b_frame, textvariable=self.b_str)
+        b_entry.grid(row=5, column=1, columnspan=4, pady=15)
+        q_entry = Entry(b_frame, textvariable=self.q_str)
+        q_entry.grid(row=8, column=1, columnspan=4, pady=15)
+        p_entry = Entry(b_frame, textvariable=self.p_str)
+        p_entry.grid(row=11, column=1, columnspan=4, pady=15)
+
+        # Add Item Button
+        self.a_butt = Button(b_frame, text="Add Item",
+                             state="disabled",
+                             font=("Helvetica", 11),
+                             command=self.db_add)
+        self.a_butt.grid(row=14, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+
+        # Go Back Button
+        back_butt = Button(b_frame, text="Go Back", font=("Helvetica", 11),
+                           command=self.close_win)
+        back_butt.grid(row=14, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+
+        self.lift()
+
+    # Callback function for add item button
+    def db_add(self):
+        # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
+        if not self.b_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Barcode", message="Barcode must be comprised of only integers.")
+            return
+        if not self.q_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Quantity", message="Quantity must be a whole integer.")
+            return
+        try:
+            float(self.p_str.get())
+            if "." in self.p_str.get() and len(self.p_str.get().rsplit(".")[1]) > 2:
+                raise ValueError
+        except ValueError:
+            tk.messagebox.showerror(title="Invalid Price",
+                                    message="Price must be a "
+                                    "floating point number which "
+                                    "does not extend beyond the "
+                                    "hundredth place.")
+            return
+        # At this point in func, all data is of valid type --> Next we must check barcode/name collisions in DB
+
+    # Callback function for add item button
+    def ok_to_add(self, var, index, mode):
+        print("called")
+        if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.p_str.get():
+            self.a_butt.config(state="normal")
+        else:
+            self.a_butt.config(state="disabled")
+
+    def close_win(self):
+        self.main_window.deiconify()
+        self.destroy()
 
 
 if __name__ == '__main__':
