@@ -14,20 +14,21 @@ import tkinter as tk
 from tkinter import *
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
+
 db = client["InvManager"]
 Inventory = db["Inventory"]
 Stats = db["StatsTime"]  # Used in determining stats over time for the inventory
 NameBcode = db["NameBarcode"]
 
 
-def getDat(Collection):
+def get_dat(collection):
     dicts = []
-    for x in Collection.find():
+    for x in collection.find():
         dicts.append(x)
     return dicts
 
 
-def setDat():
+def set_dat():
     # Functionally basic set statement, that ensures that product names and barcodes are unique.
     # Plan on implementing more in depth additive quantities or something similar later and
     # potentially more data.
@@ -73,13 +74,13 @@ def setDat():
     return Inventory.insert_one({"name": name, "barcode": bcode, "quantity": int(quan), "price": float(price)})
 
 
-def editDat():
+def edit_dat():
     # NOT IMPLEMENTED
     return 0
 
 
 # Simple Quantity editor for testing matplotlib functions
-def editQuan():
+def edit_quan():
     typeIn = input("\nID by (N)ame or (B)arcode: ").lower()  # may change this to just input bar/name
     if typeIn == "n":
         name = input("Insert item name: ")
@@ -106,20 +107,20 @@ def editQuan():
         return 0
 
 
-def delDat():
+def del_dat():
     name_bar = input("Insert name/barcode of item to be removed:")
     return Inventory.delete_one({"$or": [{"name": name_bar}, {"barcode": name_bar}]})
 
 
 # !! SORT NOT WORKING, UNSURE AS TO WHY
-def sortDat():
+def sort_dat():
     print("What would you like to sort by?")
     sort = input("(N)ame, (B)arcode, (Q)uantity, (P)rice:").lower()
     asOdes = input("(A)scending or (D)escending order:").lower()
     j = 0
     if sort == "n":
         if asOdes == "a":
-            sorted  = Inventory.find().sort("name")
+            sorted = Inventory.find().sort("name")
             for i in sorted:
                 j += 1
                 print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
@@ -183,7 +184,7 @@ def sortDat():
     return
 
 
-def getStats(code):
+def get_stats(code):
     statsDict = Stats.find({"barcode": code})
     times = []
     quantities = []
@@ -203,15 +204,15 @@ def getStats(code):
 
 
 # ONLY USED FOR TESTING
-def clearDat():
+def clear_dat():
     Inventory.delete_many({})
     Stats.delete_many({})
     NameBcode.delete_many({})
 
 
 # Test function for testing matplotlib output in tandem with the databases.
-def testGraphs():
-    clearDat()
+def test_graphs():
+    clear_dat()
     start = datetime.date(2023, 1, 1)
     end = datetime.date(2023, 1, 31)
     d = datetime.timedelta(days=2)
@@ -219,8 +220,8 @@ def testGraphs():
     while start <= end:
         Stats.insert_one({"time": str(start), "barcode": "0", "quantity": random.randrange(0, 20)})
         start += d
-    getStats("0")
-    clearDat()
+    get_stats("0")
+    clear_dat()
 
 
 class UI(tk.Tk):
@@ -262,15 +263,15 @@ class UI(tk.Tk):
 
         # Add Data Button
         add_butt = Button(but1_border, text="Add to Inventory",
-                           bg="white",
-                           borderwidth=0,
-                           font=("Helvetica", 11),
-                           command=self.inv_add)
+                          bg="white",
+                          borderwidth=0,
+                          font=("Helvetica", 11),
+                          command=self.inv_add)
         add_butt.grid()
         add_butt.config(width=18)
 
         # Show Inventory Button
-        show_butt = Button(but2_border, text="Show Inventory",
+        show_butt = Button(but2_border, text="Show Inventory", command=self.inv_show,
                            bg="white",
                            font=("Helvetica", 11),
                            borderwidth=0)
@@ -278,7 +279,7 @@ class UI(tk.Tk):
         show_butt.config(width=18)
 
         # Statistics Button for now
-        stat_butt = Button(but3_border, text="Show Inventory", command=self.inv_show,
+        stat_butt = Button(but3_border, text="Show Statistics",
                            bg="white",
                            font=("Helvetica", 11),
                            borderwidth=0)
@@ -294,15 +295,36 @@ class UI(tk.Tk):
         close_butt.grid()
 
     def inv_show(self):
+        # Hides Original window while modifying
+        self.withdraw()
         # This is where we must open new window to edit Inventory DB
-        edit = Toplevel(self)
+        show = ShowInv(self)
 
-        edit.title("Data Modification")
-        edit.geometry("200x200")
+    def inv_add(self):
+        print("Accessing Inventory...")
+
+        # Hides Original window while modifying
+        self.withdraw()
+
+        # This is where we must open new window to edit Inventory DB
+        addn = AddNew(self)
+
+    def close_main(self):
+        self.destroy()
+
+
+class ShowInv(tk.Tk):
+    def __init__(self, mas):
+        super().__init__()
+        self.main_window = mas
+        self.configure(bg="#d0fbff")
+        self.title("Data Modification")
+        self.geometry("200x200")
+        self.resizable(False, False)
 
         def inv():
             output = ""
-            res = getDat(Inventory)
+            res = get_dat(Inventory)
             j = 0
             for i in res:
                 j += 1
@@ -314,26 +336,23 @@ class UI(tk.Tk):
                 message=output
             )
 
-
         def stat():
             output = ""
-            res = getDat(Stats)
+            res = get_dat(Stats)
             j = 0
             for i in res:
                 j += 1
                 output += ("[" + str(j) + "] " + "Barcode: " + i['barcode'] + ", Time: " + str(i['time'])
-                          + ", Quantity: " + str(i['quantity']) + "\n")
-
+                           + ", Quantity: " + str(i['quantity']) + "\n")
 
             tk.messagebox.showinfo(
                 title='Statistics',
                 message=output
             )
 
-
         def barcode():
             output = ""
-            res = getDat(NameBcode)
+            res = get_dat(NameBcode)
             j = 0
             for i in res:
                 j += 1
@@ -345,80 +364,20 @@ class UI(tk.Tk):
             )
 
         # Add Label and Button to EDIT window
-        mod_label = Label(edit, text="Which database Would you like to view?").grid(row=0)
+        mod_label = Label(self, text="Which database Would you like to view?")
+        mod_label.grid(row=0)
         # out = Label(edit, text=output).grid(row=1)
-        inv_butt = Button(edit, text="Inventory", command=lambda: inv())
+        inv_butt = Button(self, text="Inventory", command=lambda: inv())
         inv_butt.grid(row=1)
-        stat_butt = Button(edit, text="Statistics", command=lambda: stat())
+        stat_butt = Button(self, text="Statistics", command=lambda: stat())
         stat_butt.grid(row=2)
-        bcode_butt = Button(edit, text="Barcodes", command=lambda: barcode())
+        bcode_butt = Button(self, text="Barcodes", command=lambda: barcode())
         bcode_butt.grid(row=3)
-        back_butt = Button(edit, text="Go Back", command=lambda: self.close_edit(edit))
+        back_butt = Button(self, text="Go Back", command=self.close_win)
         back_butt.grid(row=4)
 
-        # Hides Original window while modifying
-        self.withdraw()
-
-    def inv_add(self):
-        print("Accessing Inventory...")
-        
-        # Hides Original window while modifying
-        self.withdraw()
-        
-        # This is where we must open new window to edit Inventory DB
-        addn = AddNew(self)
-
-        def submit_clicked():
-            n = name.get()
-            b = barcode.get()
-            q = int(quantity.get())
-            p = float(price.get())
-            x = Inventory.find_one({"name": n})
-            if x:
-                nameF = tk.messagebox.askquestion\
-                    ('Name Found','Entry with name ' + n + ' found. Update it?')
-                if nameF:
-                    Inventory.update_one({"name": n}, {"$set": {"name": n, "barcode": b,
-                                                                          "quantity": q,
-                                                                          "price": p}})
-            y = Inventory.find_one({"barcode": b})
-            if y and not x:
-                nameB = tk.messagebox.askquestion \
-                    ('Barcode Found', 'Entry with barcode ' + b + ' found. Update it?')
-                if nameB:
-                    Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b,
-                                                                              "quantity": q,
-                                                                              "price": p}})
-            z = NameBcode.find_one({"barcode": b})
-            if not z:
-                nameBU = tk.messagebox.askquestion \
-                    ('Unique Barcode Found', 'Unique barcode found. Update unique database?')
-                if nameBU:
-                    NameBcode.insert_one({"name": n, "barcode": b})
-            else:
-                if z["name"] != n:
-                    nameBA = tk.messagebox.askquestion \
-                        ('Unique Barcode Already Used',
-                         'Unique barcode already used. Update unique and statistics database?')
-                    if nameBA:
-                        NameBcode.update_one({"barcode": b},{"$set": {"name": n, "barcode": b}})
-                        Stats.delete_many({"barcode": b})
-            if not x and not y:
-
-                Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "price": p})
-
-            Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q})
-
-            tk.messagebox.showinfo(
-                title='Success',
-                 message="Value Successfully inserted!"
-            )
-            name_entry.delete(0, END)
-            barc_entry.delete(0, END)
-            quan_entry.delete(0, END)
-            price_entry.delete(0, END)
-
-    def close_main(self):
+    def close_win(self):
+        self.main_window.deiconify()
         self.destroy()
 
 
@@ -491,6 +450,55 @@ class AddNew(tk.Tk):
 
         self.lift()
 
+    def submit_clicked(self):
+        n = self.n_str.get()
+        b = self.n_str.get()
+        q = int(self.q_str.get())
+        p = float(self.p_str.get())
+        x = Inventory.find_one({"name": n})
+        if x:
+            nameF = tk.messagebox.askquestion \
+                ('Name Found', 'Entry with name ' + n + ' found. Update it?')
+            if nameF:
+                Inventory.update_one({"name": n}, {"$set": {"name": n, "barcode": b,
+                                                            "quantity": q,
+                                                            "price": p}})
+        y = Inventory.find_one({"barcode": b})
+        if y and not x:
+            nameB = tk.messagebox.askquestion \
+                ('Barcode Found', 'Entry with barcode ' + b + ' found. Update it?')
+            if nameB:
+                Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b,
+                                                               "quantity": q,
+                                                               "price": p}})
+        z = NameBcode.find_one({"barcode": b})
+        if not z:
+            nameBU = tk.messagebox.askquestion \
+                ('Unique Barcode Found', 'Unique barcode found. Update unique database?')
+            if nameBU:
+                NameBcode.insert_one({"name": n, "barcode": b})
+        else:
+            if z["name"] != n:
+                nameBA = tk.messagebox.askquestion \
+                    ('Unique Barcode Already Used',
+                     'Unique barcode already used. Update unique and statistics database?')
+                if nameBA:
+                    NameBcode.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b}})
+                    Stats.delete_many({"barcode": b})
+        if not x and not y:
+            Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "price": p})
+
+        Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q})
+
+        tk.messagebox.showinfo(
+            title='Success',
+            message="Value Successfully inserted!"
+        )
+        self.n_str.set("")
+        self.b_str.set("")
+        self.q_str.set("")
+        self.p_str.set("")
+
     # Callback function for add item button
     def db_add(self):
         # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
@@ -507,11 +515,12 @@ class AddNew(tk.Tk):
         except ValueError:
             tk.messagebox.showerror(title="Invalid Price",
                                     message="Price must be a "
-                                    "floating point number which "
-                                    "does not extend beyond the "
-                                    "hundredth place.")
+                                            "floating point number which "
+                                            "does not extend beyond the "
+                                            "hundredth place.")
             return
-        # At this point in func, all data is of valid type --> Next we must check barcode/name collisions in DB
+        # Here we have a valid item to get added
+        self.submit_clicked()
 
     # Callback function for add item button
     def ok_to_add(self, var, index, mode):
@@ -549,21 +558,21 @@ if __name__ == '__main__':
             print("[3] Unique Barcodes")
             response = input()
             if int(response) == 1:
-                result = getDat(Inventory)
+                result = get_dat(Inventory)
                 j = 0
                 for i in result:
                     j += 1
                     print("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
                           + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']))
             elif int(response) == 2:
-                result = getDat(Stats)
+                result = get_dat(Stats)
                 j = 0
                 for i in result:
                     j += 1
                     print("[" + str(j) + "] " + "Barcode: " + i['barcode'] + ", Time: " + str(i['time'])
                           + ", Quantity: " + str(i['quantity']))
             elif int(response) == 3:
-                result = getDat(NameBcode)
+                result = get_dat(NameBcode)
                 j = 0
                 for i in result:
                     j += 1
@@ -571,30 +580,30 @@ if __name__ == '__main__':
             else:
                 print("Error: Invalid Database")
         elif inp == "a":
-            result = setDat()
+            result = set_dat()
 
         elif inp == "r":
-            result = delDat()
+            result = del_dat()
 
         elif inp == "s":
-            sortDat()
+            sort_dat()
 
         elif inp == "q":
-            result = editQuan()
+            result = edit_quan()
 
         elif inp == "g":
             bcode = input("\nInsert the barcode of the item to view: ")
             x = Stats.find_one({"barcode": bcode})
             if x:
-                result = getStats(bcode)
+                result = get_stats(bcode)
             else:
                 print("Error: No barcode with that information found")
 
         elif inp == "c":
-            clearDat()
+            clear_dat()
 
         elif inp == "t":
-            testGraphs()
+            test_graphs()
 
         elif inp == "x":
             sys.exit()
