@@ -161,7 +161,7 @@ class UI(tk.Tk):
         self.destroy()
 
 # Testing Data
-head = ["Name", "Barcode", "Quantity", "Price"]
+head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
 test_entries = [
 ("Name1","Barcode1","Quantity1","Price1") ,
 ("Name2","Barcode2","Quantity2","Price2") ,
@@ -196,9 +196,15 @@ class EditInv(tk.Tk):
 
         # Initializes instance attributes
         self.main_frame = None
+        self.up_frame = None
         self.tree = None
         self.text = None
         self.scroll = None
+        self.n_str = StringVar(self)
+        self.b_str = StringVar(self)
+        self.q_str = StringVar(self)
+        self.rp_str = StringVar(self)
+        self.wp_str = StringVar(self)
 
         # Initialize window components
         self.init_components()
@@ -227,20 +233,54 @@ class EditInv(tk.Tk):
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid(column=1, row=0, columnspan=5, rowspan=16, sticky=W, padx=25, pady=10)
+        
+        # Create frame for updating an entry
+        self.up_frame = Frame(self, bg="#d0fbff")
+        self.up_frame.grid_rowconfigure(0, weight=1)
+        self.up_frame.grid_columnconfigure(0, weight=1)
+        self.up_frame.grid(column=7, row=1, columnspan=5, rowspan=14, sticky=W, padx=25, pady=10)
 
+        # Create 5 labels for up_frame
+        n_lbl = Label(self.up_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        n_lbl.grid(row=2, column=7, sticky=E)
+        b_lbl = Label(self.up_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        b_lbl.grid(row=5, column=7, sticky=E)
+        q_lbl = Label(self.up_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        q_lbl.grid(row=8, column=7, sticky=E)
+        rp_lbl = Label(self.up_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        rp_lbl.grid(row=11, column=7, sticky=E)
+        wp_lbl = Label(self.up_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        wp_lbl.grid(row=14, column=7, sticky=E)
+
+        # Create 5 Entry boxes for up_frame
+        n_entry = Entry(self.up_frame, textvariable=self.n_str)
+        n_entry.grid(row=2, column=8, columnspan=4, pady=15)
+        b_entry = Entry(self.up_frame, textvariable=self.b_str)
+        b_entry.grid(row=5, column=8, columnspan=4, pady=15)
+        q_entry = Entry(self.up_frame, textvariable=self.q_str)
+        q_entry.grid(row=8, column=8, columnspan=4, pady=15)
+        rp_entry = Entry(self.up_frame, textvariable=self.rp_str)
+        rp_entry.grid(row=11, column=8, columnspan=4, pady=15)
+        wp_entry = Entry(self.up_frame, textvariable=self.wp_str)
+        wp_entry.grid(row=14, column=8, columnspan=4, pady=15)
+        
         # Create text area for db entries
         self.tree = ttk.Treeview(self.main_frame, columns=head, show="headings",
                                  selectmode="browse",
                                  height=16)
+        # Define each column's width
         self.tree.column("Name", anchor=CENTER, width=80)
         self.tree.column("Barcode", anchor=CENTER, width=80)
-        self.tree.column("Quantity", anchor=CENTER, width=80)
-        self.tree.column("Price", anchor=CENTER, width=80)
+        self.tree.column("Quantity", anchor=CENTER, width=70)
+        self.tree.column("r_price", anchor=CENTER, width=75)
+        self.tree.column("w_price", anchor=CENTER, width=95)
+        # Define heading's text
         self.tree.heading("Name", text="Name")
         self.tree.heading("Barcode", text="Barcode")
         self.tree.heading("Quantity", text="Quantity")
-        self.tree.heading("Price", text="Price")
-        self.tree.grid(row=0, column=2, sticky="nsew", pady=2, padx=2)
+        self.tree.heading("r_price", text="Retail Price")
+        self.tree.heading("w_price", text="Wholesale Price")
+        self.tree.grid(row=0, column=2, columnspan=3, sticky="nsew", pady=2, padx=2)
 
         data = get_dat(Inventory)
         # Populating with database data
