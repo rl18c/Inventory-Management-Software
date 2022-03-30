@@ -285,7 +285,8 @@ class EditInv(tk.Tk):
         data = get_dat(Inventory)
         # Populating with database data
         for d in data:
-            l = (d["name"], d["barcode"], str(d["quantity"]), str(d["r_price"]))
+            l = (d["name"], d["barcode"], str(d["quantity"]), "$"+"{:.2f}".format(d["r_price"]),
+                 "$"+"{:.2f}".format(d["w_price"]))
             self.tree.insert("", END, values=l)
 
 
