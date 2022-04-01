@@ -28,6 +28,7 @@ def get_dat(collection):
         dicts.append(x)
     return dicts
 
+
 def inv():
     output = ""
     res = get_dat(Inventory)
@@ -163,26 +164,26 @@ class UI(tk.Tk):
 # Testing Data
 head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
 test_entries = [
-("Name1","Barcode1","Quantity1","Price1") ,
-("Name2","Barcode2","Quantity2","Price2") ,
-("Name3","Barcode3","Quantity3","Price3") ,
-("Name4","Barcode4","Quantity4","Price4") ,
-("Name5","Barcode5","Quantity5","Price5") ,
-("Name6","Barcode6","Quantity6","Price6") ,
-("Name7","Barcode7","Quantity7","Price7") ,
-("Name8","Barcode8","Quantity8","Price8") ,
-("Name9","Barcode9","Quantity9","Price9") ,
-("Name10","Barcode10","Quantity10","Price10"),
-("Name1","Barcode1","Quantity1","Price1") ,
-("Name2","Barcode2","Quantity2","Price2") ,
-("Name3","Barcode3","Quantity3","Price3") ,
-("Name4","Barcode4","Quantity4","Price4") ,
-("Name5","Barcode5","Quantity5","Price5") ,
-("Name6","Barcode6","Quantity6","Price6") ,
-("Name7","Barcode7","Quantity7","Price7") ,
-("Name8","Barcode8","Quantity8","Price8") ,
-("Name9","Barcode9","Quantity9","Price9") ,
-("Name10","Barcode10","Quantity10","Price10")
+("Name1","Barcode1","Quantity1","rPrice1", "wPrice1") ,
+("Name2","Barcode2","Quantity2","rPrice2", "wPrice2") ,
+("Name3","Barcode3","Quantity3","rPrice3", "wPrice3") ,
+("Name4","Barcode4","Quantity4","rPrice4", "wPrice4") ,
+("Name5","Barcode5","Quantity5","rPrice5", "wPrice5") ,
+("Name6","Barcode6","Quantity6","rPrice6", "wPrice6") ,
+("Name7","Barcode7","Quantity7","rPrice7", "wPrice7") ,
+("Name8","Barcode8","Quantity8","rPrice8", "wPrice8") ,
+("Name9","Barcode9","Quantity9","rPrice9", "wPrice9") ,
+("Name10","Barcode10","Quantity10","rPrice10", "wPrice10"),
+("Name1","Barcode1","Quantity1","rPrice1", "wPrice1") ,
+("Name2","Barcode2","Quantity2","rPrice2", "wPrice2") ,
+("Name3","Barcode3","Quantity3","rPrice3", "wPrice3") ,
+("Name4","Barcode4","Quantity4","rPrice4", "wPrice4") ,
+("Name5","Barcode5","Quantity5","rPrice5", "wPrice5") ,
+("Name6","Barcode6","Quantity6","rPrice6", "wPrice6") ,
+("Name7","Barcode7","Quantity7","rPrice7", "wPrice7") ,
+("Name8","Barcode8","Quantity8","rPrice8", "wPrice8") ,
+("Name9","Barcode9","Quantity9","rPrice9", "wPrice9") ,
+("Name10","Barcode10","Quantity10","rPrice10", "wPrice10")
 ]
 
 
@@ -200,6 +201,9 @@ class EditInv(tk.Tk):
         self.tree = None
         self.text = None
         self.scroll = None
+        self.up_butt = None
+        self.cur = None
+        self.modifying = None
         self.n_str = StringVar(self)
         self.b_str = StringVar(self)
         self.q_str = StringVar(self)
@@ -215,25 +219,77 @@ class EditInv(tk.Tk):
         for r in range(row):
             self.grid_rowconfigure(r, minsize=20)
         # Add Label and Button to EDIT window
-        #mod_label = Label(self, text="Which database Would you like to view?")
-        #mod_label.grid(row=0)
+        # mod_label = Label(self, text="Which database Would you like to view?")
+        # mod_label.grid(row=0)
         # out = Label(edit, text=output).grid(row=1)
-        #inv_butt = Button(self, text="Inventory", command=lambda: inv())
-        #inv_butt.grid(row=1)
-        #stat_butt = Button(self, text="Statistics", command=lambda: stat())
-        #stat_butt.grid(row=2)
-        #bcode_butt = Button(self, text="Barcodes", command=lambda: barcode())
-        #bcode_butt.grid(row=3)
-        #back_butt = Button(self, text="Go Back", command=self.close_win)
-        #back_butt.grid(row=4)
+        # inv_butt = Button(self, text="Inventory", command=lambda: inv())
+        # inv_butt.grid(row=1)
+        # stat_butt = Button(self, text="Statistics", command=lambda: stat())
+        # stat_butt.grid(row=2)
+        # bcode_butt = Button(self, text="Barcodes", command=lambda: barcode())
+        # bcode_butt.grid(row=3)
+        # back_butt = Button(self, text="Go Back", command=self.close_win)
+        # back_butt.grid(row=4)
 
     def init_components(self):
+        def hide_widgets():
+            n_lbl.grid_remove()
+            b_lbl.grid_remove()
+            q_lbl.grid_remove()
+            rp_lbl.grid_remove()
+            wp_lbl.grid_remove()
+            n_entry.grid_remove()
+            b_entry.grid_remove()
+            q_entry.grid_remove()
+            rp_entry.grid_remove()
+            wp_entry.grid_remove()
+            self.up_butt.grid_remove()
+
+        def show_widgets():
+            n_lbl.grid()
+            b_lbl.grid()
+            q_lbl.grid()
+            rp_lbl.grid()
+            wp_lbl.grid()
+            n_entry.grid()
+            b_entry.grid()
+            q_entry.grid()
+            rp_entry.grid()
+            wp_entry.grid()
+            self.up_butt.grid()
+
+        def mod_clicked():
+            if self.cur:
+                i = self.tree.item(self.cur)
+                self.n_str.set(i["values"][0])
+                self.b_str.set(i["values"][1])
+                self.q_str.set(i["values"][2])
+                self.rp_str.set(i["values"][3])
+                self.wp_str.set(i["values"][4])
+                self.modifying = True
+                show_widgets()
+
+        def select_changed(event):
+            if self.modifying:
+                if tk.messagebox.askyesno(title="Switch",
+                        message="Are you sure you want to terminate modifications?"):
+                    self.cur = self.tree.focus()
+                    self.n_str.set("")
+                    self.b_str.set("")
+                    self.q_str.set("")
+                    self.rp_str.set("")
+                    self.wp_str.set("")
+                    self.modifying = False
+                    hide_widgets()
+            else:
+                self.cur = self.tree.focus()
+
         # Create db_list outer frame
         self.main_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         self.main_frame.grid_rowconfigure(0, weight=1)
         self.main_frame.grid_columnconfigure(0, weight=1)
         self.main_frame.grid(column=1, row=0, columnspan=5, rowspan=16, sticky=W, padx=25, pady=10)
-        
+
         # Create frame for updating an entry
         self.up_frame = Frame(self, bg="#d0fbff")
         self.up_frame.grid_rowconfigure(0, weight=1)
@@ -263,7 +319,14 @@ class EditInv(tk.Tk):
         rp_entry.grid(row=11, column=8, columnspan=4, pady=15)
         wp_entry = Entry(self.up_frame, textvariable=self.wp_str)
         wp_entry.grid(row=14, column=8, columnspan=4, pady=15)
-        
+
+        # Adding traces to StringVars
+        self.n_str.trace("w", self.ok_to_add)
+        self.b_str.trace("w", self.ok_to_add)
+        self.q_str.trace("w", self.ok_to_add)
+        self.rp_str.trace("w", self.ok_to_add)
+        self.wp_str.trace("w", self.ok_to_add)
+
         # Create text area for db entries
         self.tree = ttk.Treeview(self.main_frame, columns=head, show="headings",
                                  selectmode="browse",
@@ -281,14 +344,15 @@ class EditInv(tk.Tk):
         self.tree.heading("r_price", text="Retail Price")
         self.tree.heading("w_price", text="Wholesale Price")
         self.tree.grid(row=0, column=2, columnspan=3, sticky="nsew", pady=2, padx=2)
+        # Binding a selection change to function
+        self.tree.bind("<<TreeviewSelect>>", select_changed)
 
         data = get_dat(Inventory)
         # Populating with database data
         for d in data:
-            l = (d["name"], d["barcode"], str(d["quantity"]), "$"+"{:.2f}".format(d["r_price"]),
-                 "$"+"{:.2f}".format(d["w_price"]))
+            l = (d["name"], d["barcode"], str(d["quantity"]), "$" + "{:.2f}".format(d["r_price"]),
+                 "$" + "{:.2f}".format(d["w_price"]))
             self.tree.insert("", END, values=l)
-
 
         # Create scrollbar on right side
         self.scroll = Scrollbar(self.main_frame, orient="vertical", command=self.tree.yview)
@@ -299,14 +363,52 @@ class EditInv(tk.Tk):
         rem_butt = Button(self, text="Remove Selected Item")
         rem_butt.grid(row=17, column=1, rowspan=2, columnspan=2, sticky=W)
 
-        mod_butt = Button(self, text="Modify Selected Item")
+        mod_butt = Button(self, text="Modify Selected Item", command=mod_clicked)
         mod_butt.grid(row=17, column=4, rowspan=2, columnspan=2, sticky=W)
 
         # Create Update Item button
-        up_butt = Button(self, text="Update Item", state="disabled")
+        self.up_butt = Button(self, text="Update Item", state="disabled", command=self.db_update)
+        self.up_butt.grid(row=17, column=7, rowspan=2, columnspan=2, sticky=W)
 
         back_butt = Button(self, text="Go Back", command=self.close_win)
         back_butt.grid(row=17, column=10, rowspan=2, columnspan=2, padx=20)
+
+        # Here we hide the modification widgets
+        hide_widgets()
+
+    def db_update(self):
+        # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
+        if not self.b_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Barcode", message="Barcode must be comprised of only integers.")
+            return
+        if not self.q_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Quantity", message="Quantity must be a whole integer.")
+            return
+        try:
+            float(self.rp_str.get())
+            float(self.wp_str.get())
+            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) > 2:
+                raise ValueError
+            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) < 2:
+                raise ValueError
+            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) > 2:
+                raise ValueError
+            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) < 2:
+                raise ValueError
+        except ValueError:
+            tk.messagebox.showerror(title="Invalid Price",
+                                    message="Price (Retail and Wholesale) must be a "
+                                            "floating point number which "
+                                            "does not extend beyond the "
+                                            "hundredth place.")
+            return
+        # Here we have a valid item to get added
+
+    def ok_to_add(self, var, index, mode):
+        if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.rp_str.get() and self.wp_str.get():
+            self.up_butt.config(state="normal")
+        else:
+            self.up_butt.config(state="disabled")
 
     def close_win(self):
         self.main_window.deiconify()
@@ -319,7 +421,7 @@ class AddNew(tk.Tk):
         self.main_window = mas
         self.configure(bg="#d0fbff")
         self.title("New Item")
-        #self.geometry("330x300")
+        # self.geometry("330x300")
         self.resizable(False, False)
 
         # Creating 4 string variables for text box values
