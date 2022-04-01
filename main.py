@@ -475,17 +475,29 @@ class AddNew(tk.Tk):
         rp_entry.grid(row=11, column=1, columnspan=4, pady=15)
         wp_entry = Entry(b_frame, textvariable=self.wp_str)
         wp_entry.grid(row=14, column=1, columnspan=4, pady=15)
+
+        # Add button border
+        add_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
+        add_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        # Go Back button border
+        back_border = Frame(b_frame, highlightthickness=2, highlightbackground="#d10000")
+        back_border.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+
         # Add Item Button
-        self.a_butt = Button(b_frame, text="Add Item",
+        self.a_butt = Button(add_border, text="Add Item",
+                             bg="white",
+                             borderwidth=0,
                              state="disabled",
                              font=("Helvetica", 11),
                              command=self.db_add)
-        self.a_butt.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        self.a_butt.grid()
 
         # Go Back Button
-        back_butt = Button(b_frame, text="Go Back", font=("Helvetica", 11),
+        back_butt = Button(back_border, text="Go Back", font=("Helvetica", 11),
+                           bg="white",
+                           borderwidth=0,
                            command=self.close_win)
-        back_butt.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+        back_butt.grid()
 
         self.lift()
 
@@ -580,6 +592,7 @@ class AddNew(tk.Tk):
     def close_win(self):
         self.main_window.deiconify()
         self.destroy()
+
 
 
 if __name__ == '__main__':
