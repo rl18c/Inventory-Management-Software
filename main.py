@@ -109,6 +109,9 @@ class UI(tk.Tk):
         # Button Frame 4
         but4_border = Frame(self, highlightthickness=2, highlightbackground="#d10000")
         but4_border.grid(column=3, row=5, columnspan=2, padx=25)
+        # Button Frame 4
+        but5_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        but5_border.grid(column=2, row=3, columnspan=2, sticky=W, padx=25, pady=10)
 
         # Add Data Button
         add_butt = Button(but1_border, text="Add to Inventory",
@@ -135,6 +138,12 @@ class UI(tk.Tk):
         mod_butt.grid()
         mod_butt.config(width=18)
 
+        graph_butt = Button(but5_border, text="Show Graphs", command=self.graph_menu,
+                           bg="white",
+                           font=("Helvetica", 11),
+                           borderwidth=0)
+        graph_butt.grid()
+        graph_butt.config(width=18)
         # Close Window Button
         close_butt = Button(but4_border, text="Close Manager",
                             bg="white",
@@ -142,6 +151,13 @@ class UI(tk.Tk):
                             command=self.close_main,
                             borderwidth=0)
         close_butt.grid()
+
+
+    def graph_menu(self):
+        # Hides Original window while modifying
+        self.withdraw()
+
+        graphm = GraphMenu(self)
 
     def inv_edit(self):
         # Hides Original window while modifying
@@ -155,7 +171,7 @@ class UI(tk.Tk):
         # Hides Original window while modifying
         self.withdraw()
 
-        # This is where we must open new window to edit Inventory DB
+        # This is where we must open new window to add Inventory DB
         addn = AddNew(self)
 
     def close_main(self):
@@ -263,8 +279,8 @@ class EditInv(tk.Tk):
                 self.n_str.set(i["values"][0])
                 self.b_str.set(i["values"][1])
                 self.q_str.set(i["values"][2])
-                self.rp_str.set(i["values"][3])
-                self.wp_str.set(i["values"][4])
+                self.rp_str.set(i["values"][3][1:])
+                self.wp_str.set(i["values"][4][1:])
                 self.modifying = True
                 show_widgets()
 
@@ -393,12 +409,21 @@ class EditInv(tk.Tk):
     def db_remove(self):
         if self.cur:
             i = self.tree.item(self.cur)
-            name_val = i["values"][0]
-            bar_val = i["values"][1]
-            quan_val = i["values"][2]
-            rprice_val = i["values"][3]
-            wprice_val = i["values"][4]
-            # Here we now have the 5 values of the selected item, must be deleted
+            name_val = str(i["values"][0])
+            bar_val = str(i["values"][1])
+
+            Inventory.delete_one({"name": name_val, "barcode": bar_val})
+            self.tree.delete(self.cur)
+            del_unique = tk.messagebox.askquestion \
+                ('Barcode', 'Delete name + barcode correlation?')
+            if del_unique:
+                NameBcode.delete_one({"name": name_val, "barcode": bar_val})
+            del_stats = tk.messagebox.askquestion \
+                ('Statistics', 'Delete statistic data for item?')
+            if del_stats:
+                Stats.delete_many({"barcode": bar_val})
+            tk.messagebox.showinfo(title="Item Deletion",
+                                   message="Item : " + name_val + " has been deleted.")
         else:
             tk.messagebox.showerror(title="No Selection", message="No selected item to remove.")
 
@@ -430,7 +455,53 @@ class EditInv(tk.Tk):
             return
         # Here we have a valid item to get added (MUST ADD AND SET modifying=false)
         self.modifying = False
-        # Update Item in DB
+        i = self.tree.item(self.cur)
+        n = str(self.n_str.get())
+        b = str(self.b_str.get())
+        q = int(self.q_str.get())
+        rp = float(self.rp_str.get())
+        wp = float(self.wp_str.get())
+        # need to add checks for updating name/barcode and changing quantity for stats
+        if q != int(i["values"][2]):
+            Stats.insert_one(
+                {"time": datetime.datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+        if n != str(i["values"][0]) or b != str(i["values"][1]):
+
+            name_update = tk.messagebox.askquestion \
+                ('Unique Update', 'Name/Barcode changed: Update unique correlation?' + n + str(i["values"][0]))
+            if name_update:
+                barcode_update = False
+                if NameBcode.find_one({"barcode": b}) and b != str(i["values"][1]):
+                    barcode_update = tk.messagebox.askquestion \
+                        ('Barcode Taken', 'Switch or delete barcodes? (Yes for modify, no for Delete)')
+                    if barcode_update:
+                        NameBcode.update_one({"barcode": b}, {"$set": {"barcode": str(i["values"][1])}})
+                        Inventory.update_one({"barcode": b}, {"$set": {"barcode": str(i["values"][1])}})
+                        Stats.update_many({"barcode": b}, {"$set": {"barcode": "placeholder"}})
+                        # Column integer to match the column which was clicked in the table
+                        entries = self.tree.get_children()
+
+                        for item in entries: #NEED TO UPDATE VIEW (this does not work)
+                            if str(self.tree.item(item)['values'][1]) == b:
+                                self.tree.item(item)['values'][1] = str(i["values"][1])
+                                break
+
+                    else:
+                        NameBcode.delete_one({"barcode": b})
+                        Inventory.delete_one({"barcode": b})
+                        Stats.delete_many({"barcode": b})
+
+                NameBcode.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b}})
+                Inventory.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b,
+                                                                                 "quantity": q, "r_price": rp,
+                                                                                 "w_price": wp}})
+                Stats.update_many({"barcode": str(i["values"][1])}, {"$set": {"barcode": b}})
+                if barcode_update:
+                    Stats.update_many({"barcode": "placeholder"}, {"$set": {"barcode": str(i["values"][1])}})
+        Inventory.update_one({"name": str(i["values"][0]),
+                              "barcode": str(i["values"][1])}, {"$set": {"name": n, "barcode": b,
+                                                                         "quantity": q, "r_price": rp, "w_price": wp}})
+        self.tree.item(self.cur, values=(n, b, str(q), '$' + "{:.2f}".format(rp), '$' + "{:.2f}".format(wp)))
         self.hide_widgets()
         tk.messagebox.showinfo(title="Item Update",
                                 message="Item : " + self.n_str.get() + " has been updated.")
@@ -568,10 +639,12 @@ class AddNew(tk.Tk):
                 if nameBA:
                     NameBcode.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b}})
                     Stats.delete_many({"barcode": b})
+                    Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b, "quantity": q,
+                                                                   "r_price": rp, "w_price": wp}})
         if not x and not y:
             Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
 
-        Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q})
+        Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
 
         tk.messagebox.showinfo(
             title='Success',
@@ -623,6 +696,15 @@ class AddNew(tk.Tk):
     def close_win(self):
         self.main_window.deiconify()
         self.destroy()
+
+class GraphMenu(tk.Tk):
+    def __init__(self, mas):
+        super().__init__()
+        self.main_window = mas
+        self.configure(bg="#d0fbff")
+        self.title("New Item")
+        # self.geometry("330x300")
+        self.resizable(False, False)
 
 
 if __name__ == '__main__':
