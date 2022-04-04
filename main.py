@@ -204,6 +204,16 @@ class EditInv(tk.Tk):
         self.up_butt = None
         self.cur = None
         self.modifying = None
+        self.n_lbl = None
+        self.b_lbl = None
+        self.q_lbl = None
+        self.rp_lbl = None
+        self.wp_lbl = None
+        self.n_entry = None
+        self.b_entry = None
+        self.q_entry = None
+        self.rp_entry = None
+        self.wp_entry = None
         self.n_str = StringVar(self)
         self.b_str = StringVar(self)
         self.q_str = StringVar(self)
@@ -232,32 +242,21 @@ class EditInv(tk.Tk):
         # back_butt.grid(row=4)
 
     def init_components(self):
-        def hide_widgets():
-            n_lbl.grid_remove()
-            b_lbl.grid_remove()
-            q_lbl.grid_remove()
-            rp_lbl.grid_remove()
-            wp_lbl.grid_remove()
-            n_entry.grid_remove()
-            b_entry.grid_remove()
-            q_entry.grid_remove()
-            rp_entry.grid_remove()
-            wp_entry.grid_remove()
-            self.up_butt.grid_remove()
-
+        # Adds modification widgets to the grid
         def show_widgets():
-            n_lbl.grid()
-            b_lbl.grid()
-            q_lbl.grid()
-            rp_lbl.grid()
-            wp_lbl.grid()
-            n_entry.grid()
-            b_entry.grid()
-            q_entry.grid()
-            rp_entry.grid()
-            wp_entry.grid()
+            self.n_lbl.grid()
+            self.b_lbl.grid()
+            self.q_lbl.grid()
+            self.rp_lbl.grid()
+            self.wp_lbl.grid()
+            self.n_entry.grid()
+            self.b_entry.grid()
+            self.q_entry.grid()
+            self.rp_entry.grid()
+            self.wp_entry.grid()
             self.up_butt.grid()
 
+        # Function to handle user modifying selection
         def mod_clicked():
             if self.cur:
                 i = self.tree.item(self.cur)
@@ -269,6 +268,7 @@ class EditInv(tk.Tk):
                 self.modifying = True
                 show_widgets()
 
+        # Function called when user selects different item
         def select_changed(event):
             if self.modifying:
                 if tk.messagebox.askyesno(title="Switch",
@@ -280,7 +280,7 @@ class EditInv(tk.Tk):
                     self.rp_str.set("")
                     self.wp_str.set("")
                     self.modifying = False
-                    hide_widgets()
+                    self.hide_widgets()
             else:
                 self.cur = self.tree.focus()
 
@@ -297,28 +297,28 @@ class EditInv(tk.Tk):
         self.up_frame.grid(column=7, row=1, columnspan=5, rowspan=14, sticky=W, padx=25, pady=10)
 
         # Create 5 labels for up_frame
-        n_lbl = Label(self.up_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
-        n_lbl.grid(row=2, column=7, sticky=E)
-        b_lbl = Label(self.up_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
-        b_lbl.grid(row=5, column=7, sticky=E)
-        q_lbl = Label(self.up_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
-        q_lbl.grid(row=8, column=7, sticky=E)
-        rp_lbl = Label(self.up_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
-        rp_lbl.grid(row=11, column=7, sticky=E)
-        wp_lbl = Label(self.up_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
-        wp_lbl.grid(row=14, column=7, sticky=E)
+        self.n_lbl = Label(self.up_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        self.n_lbl.grid(row=2, column=7, sticky=E)
+        self.b_lbl = Label(self.up_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        self.b_lbl.grid(row=5, column=7, sticky=E)
+        self.q_lbl = Label(self.up_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        self.q_lbl.grid(row=8, column=7, sticky=E)
+        self.rp_lbl = Label(self.up_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.rp_lbl.grid(row=11, column=7, sticky=E)
+        self.wp_lbl = Label(self.up_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.wp_lbl.grid(row=14, column=7, sticky=E)
 
         # Create 5 Entry boxes for up_frame
-        n_entry = Entry(self.up_frame, textvariable=self.n_str)
-        n_entry.grid(row=2, column=8, columnspan=4, pady=15)
-        b_entry = Entry(self.up_frame, textvariable=self.b_str)
-        b_entry.grid(row=5, column=8, columnspan=4, pady=15)
-        q_entry = Entry(self.up_frame, textvariable=self.q_str)
-        q_entry.grid(row=8, column=8, columnspan=4, pady=15)
-        rp_entry = Entry(self.up_frame, textvariable=self.rp_str)
-        rp_entry.grid(row=11, column=8, columnspan=4, pady=15)
-        wp_entry = Entry(self.up_frame, textvariable=self.wp_str)
-        wp_entry.grid(row=14, column=8, columnspan=4, pady=15)
+        self.n_entry = Entry(self.up_frame, textvariable=self.n_str)
+        self.n_entry.grid(row=2, column=8, columnspan=4, pady=15)
+        self.b_entry = Entry(self.up_frame, textvariable=self.b_str)
+        self.b_entry.grid(row=5, column=8, columnspan=4, pady=15)
+        self.q_entry = Entry(self.up_frame, textvariable=self.q_str)
+        self.q_entry.grid(row=8, column=8, columnspan=4, pady=15)
+        self.rp_entry = Entry(self.up_frame, textvariable=self.rp_str)
+        self.rp_entry.grid(row=11, column=8, columnspan=4, pady=15)
+        self.wp_entry = Entry(self.up_frame, textvariable=self.wp_str)
+        self.wp_entry.grid(row=14, column=8, columnspan=4, pady=15)
 
         # Adding traces to StringVars
         self.n_str.trace("w", self.ok_to_add)
@@ -360,7 +360,7 @@ class EditInv(tk.Tk):
         self.tree.config(yscrollcommand=self.scroll.set)
 
         # Create and place 'Remove' and 'Modify' buttons
-        rem_butt = Button(self, text="Remove Selected Item")
+        rem_butt = Button(self, text="Remove Selected Item", command=self.db_remove)
         rem_butt.grid(row=17, column=1, rowspan=2, columnspan=2, sticky=W)
 
         mod_butt = Button(self, text="Modify Selected Item", command=mod_clicked)
@@ -374,7 +374,33 @@ class EditInv(tk.Tk):
         back_butt.grid(row=17, column=10, rowspan=2, columnspan=2, padx=20)
 
         # Here we hide the modification widgets
-        hide_widgets()
+        self.hide_widgets()
+
+    # Will hide a modification widgets
+    def hide_widgets(self):
+        self.n_lbl.grid_remove()
+        self.b_lbl.grid_remove()
+        self.q_lbl.grid_remove()
+        self.rp_lbl.grid_remove()
+        self.wp_lbl.grid_remove()
+        self.n_entry.grid_remove()
+        self.b_entry.grid_remove()
+        self.q_entry.grid_remove()
+        self.rp_entry.grid_remove()
+        self.wp_entry.grid_remove()
+        self.up_butt.grid_remove()
+
+    def db_remove(self):
+        if self.cur:
+            i = self.tree.item(self.cur)
+            name_val = i["values"][0]
+            bar_val = i["values"][1]
+            quan_val = i["values"][2]
+            rprice_val = i["values"][3]
+            wprice_val = i["values"][4]
+            # Here we now have the 5 values of the selected item, must be deleted
+        else:
+            tk.messagebox.showerror(title="No Selection", message="No selected item to remove.")
 
     def db_update(self):
         # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
@@ -402,7 +428,12 @@ class EditInv(tk.Tk):
                                             "does not extend beyond the "
                                             "hundredth place.")
             return
-        # Here we have a valid item to get added
+        # Here we have a valid item to get added (MUST ADD AND SET modifying=false)
+        self.modifying = False
+        # Update Item in DB
+        self.hide_widgets()
+        tk.messagebox.showinfo(title="Item Update",
+                                message="Item : " + self.n_str.get() + " has been updated.")
 
     def ok_to_add(self, var, index, mode):
         if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.rp_str.get() and self.wp_str.get():
@@ -592,7 +623,6 @@ class AddNew(tk.Tk):
     def close_win(self):
         self.main_window.deiconify()
         self.destroy()
-
 
 
 if __name__ == '__main__':
