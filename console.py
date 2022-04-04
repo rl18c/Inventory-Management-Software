@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import random
 import sys
 from tkinter import ttk
@@ -192,13 +192,15 @@ def sort_dat():
     return
 
 
-def get_stats(code):
+def get_stats_stock(code):
     statsDict = Stats.find({"barcode": code})
-    times = []
-    quantities = []
+    start = (statsDict[0]["time"] - timedelta(days=1))
+    times = []#start]
+    quantities = []#(0)]
     for i in statsDict:
-        times.append(i["time"])
-        quantities.append(i["quantity"])
+        if i["time"] >= start and datetime.now:
+            times.append(i["time"])
+            quantities.append(i["quantity"])
     fig, ax = plt.subplots()
     ax.plot(times, quantities)
     item = NameBcode.find_one({"barcode": code})
@@ -207,6 +209,50 @@ def get_stats(code):
     plt.ylabel("Quantity")
     plt.xlabel("Date/Time")
     plt.gcf().autofmt_xdate()
+    plt.show()
+    return 0
+
+
+def get_stats_prof(code):
+    statsDict = Stats.find({"barcode": code})
+    start = (statsDict[0]["time"] - timedelta(days=1))
+    times = [start]
+    profits = [0]
+    overall = 0.0
+    temp = 0
+    for i in statsDict:
+        if i["time"] >= start and datetime.now:
+            times.append(i["time"])
+            change = temp - i["quantity"]
+            if i["quantity"] < temp:
+                overall += float(change)*float(i["r_price"])
+                profits.append(overall)
+            elif i["quantity"] > temp:
+                overall += float(change)*float(i["w_price"])
+                profits.append(overall)
+
+            temp = i["quantity"]
+    fig, ax = plt.subplots()
+    #ax.plot(times, profits, zorder=1)
+    for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
+        if y1 > y2:
+            ax.plot([x1, x2], [y1, y2], 'r')
+        elif y1 < y2:
+            ax.plot([x1, x2], [y1, y2], 'g')
+        else:
+            ax.plot([x1, x2], [y1, y2], 'b')
+    ax.scatter(times, profits, zorder=2, color='black')
+    item = NameBcode.find_one({"barcode": code})
+
+    plt.suptitle("Profits of " + item["name"] + " Over Time")
+    plt.ylabel("Profit")
+    plt.xlabel("Date/Time")
+    if overall >= 0:
+        plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
+    else:
+        plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
+    plt.gcf().autofmt_xdate()
+    plt.grid()
     plt.show()
     return 0
 
@@ -228,7 +274,7 @@ def test_graphs():
     while start <= end:
         Stats.insert_one({"time": str(start), "barcode": "0", "quantity": random.randrange(0, 20)})
         start += d
-    get_stats("0")
+    get_stats_stock("0")
     clear_dat()
 
 print("Welcome to INVENTORY MANAGER testing.")
@@ -240,6 +286,7 @@ while True:
     print("S: Sort data")
     print("Q: Edit quantity of item")
     print("G: Show graph of item over time")
+    print("M: Show graph of profits over time")
     print("C: Clear ALL data (Clears all 3 databases)")
     print("T: Run test function (CAUTION: CLEARS DATABASES)")
     print("X: Exit")
@@ -289,7 +336,15 @@ while True:
         bcode = input("\nInsert the barcode of the item to view: ")
         x = Stats.find_one({"barcode": bcode})
         if x:
-            result = get_stats(bcode)
+            result = get_stats_stock(bcode)
+        else:
+            print("Error: No barcode with that information found")
+
+    elif inp == "m":
+        bcode = input("\nInsert the barcode of the item to view: ")
+        x = Stats.find_one({"barcode": bcode})
+        if x:
+            result = get_stats_prof(bcode)
         else:
             print("Error: No barcode with that information found")
 

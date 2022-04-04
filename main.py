@@ -705,6 +705,78 @@ class GraphMenu(tk.Tk):
         self.title("New Item")
         # self.geometry("330x300")
         self.resizable(False, False)
+        # Create frame to hold content of window
+        self.popup = tk.Tk()
+        b_frame = Frame(self)
+        b_frame.grid(column=0, row=0, columnspan=5, rowspan=20, padx=25)
+        b_frame.configure(bg="#d0fbff")
+
+        # Title Label
+        t_lbl = Label(b_frame, text="Graph Options",
+                      font=("Helvetica", 16),
+                      borderwidth=2,
+                      relief="ridge",
+                      bg="#d0fbff")
+        t_lbl.grid(row=0, column=1, rowspan=2, columnspan=3, pady=15, sticky=W)
+        # Stock button border
+        s_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
+        s_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        # Profit Graph Button
+        p_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
+        p_border.grid(row=17, column=2, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        # Go Back button border
+        back_border = Frame(b_frame, highlightthickness=2, highlightbackground="#d10000")
+        back_border.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+
+        # Stock Item Button
+        self.s_butt = Button(s_border, text="Stock Graph",
+                             bg="white",
+                             borderwidth=0,
+                             font=("Helvetica", 11),
+                             command = self.stock_options)
+        self.s_butt.grid()
+        self.p_butt = Button(p_border, text="Profit Graph",
+                             bg="white",
+                             borderwidth=0,
+                             font=("Helvetica", 11),
+                             command = self.prof_options)
+        self.p_butt.grid()
+
+        # Go Back Button
+        back_butt = Button(back_border, text="Go Back", font=("Helvetica", 11),
+                           bg="white",
+                           borderwidth=0,
+                           command=self.close_win)
+        back_butt.grid()
+
+        self.lift()
+
+
+    def stock_options(self):
+        self.popup.wm_title("Stock Graph")
+        label = ttk.Label(self.popup, text="View graph for one product, or all?")
+        label.pack(side="top", fill="x", pady=10)
+        b1 = ttk.Button(popup, text="One", )#command=self.stock_o_calender)
+        b2 = ttk.Button(popup, text="All", )#command=self.stock_a_calender)
+        b1.pack()
+        b2.pack()
+        self.popup.mainloop()
+
+
+    def prof_options(self):
+        self.popup.wm_title("Profit Graph")
+        label = ttk.Label(self.popup, text="View graph for one product, or all?")
+        label.pack(side="top", fill="x", pady=10)
+        b1 = ttk.Button(popup, text="One", )#command=self.prof_o_calender)
+        b2 = ttk.Button(popup, text="All", )#command=self.prof_a_calender)
+        b1.pack()
+        b2.pack()
+        popup.mainloop()
+
+
+    def close_win(self):
+        self.main_window.deiconify()
+        self.destroy()
 
 
 if __name__ == '__main__':
