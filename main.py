@@ -697,6 +697,7 @@ class AddNew(tk.Tk):
         self.main_window.deiconify()
         self.destroy()
 
+
 class GraphMenu(tk.Tk):
     def __init__(self, mas):
         super().__init__()
@@ -706,7 +707,7 @@ class GraphMenu(tk.Tk):
         # self.geometry("330x300")
         self.resizable(False, False)
         # Create frame to hold content of window
-        self.popup = tk.Tk()
+        self.popup = None
         b_frame = Frame(self)
         b_frame.grid(column=0, row=0, columnspan=5, rowspan=20, padx=25)
         b_frame.configure(bg="#d0fbff")
@@ -751,28 +752,27 @@ class GraphMenu(tk.Tk):
 
         self.lift()
 
-
     def stock_options(self):
+        self.popup = tk.Tk()
         self.popup.wm_title("Stock Graph")
         label = ttk.Label(self.popup, text="View graph for one product, or all?")
         label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(popup, text="One", )#command=self.stock_o_calender)
-        b2 = ttk.Button(popup, text="All", )#command=self.stock_a_calender)
+        b1 = ttk.Button(self.popup, text="One", )#command=self.stock_o_calender)
+        b2 = ttk.Button(self.popup, text="All", )#command=self.stock_a_calender)
         b1.pack()
         b2.pack()
         self.popup.mainloop()
 
-
     def prof_options(self):
+        self.popup = tk.Tk()
         self.popup.wm_title("Profit Graph")
         label = ttk.Label(self.popup, text="View graph for one product, or all?")
         label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(popup, text="One", )#command=self.prof_o_calender)
-        b2 = ttk.Button(popup, text="All", )#command=self.prof_a_calender)
+        b1 = ttk.Button(self.popup, text="One", )#command=self.prof_o_calender)
+        b2 = ttk.Button(self.popup, text="All", )#command=self.prof_a_calender)
         b1.pack()
         b2.pack()
-        popup.mainloop()
-
+        self.popup.mainloop()
 
     def close_win(self):
         self.main_window.deiconify()
