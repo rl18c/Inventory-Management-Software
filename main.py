@@ -5,14 +5,17 @@
 # Main DB (Inventory) stores data in the format name: string, barcode: string, quantity: int, price: float
 # Secondary DB (Stats) stores data in the form: barcode:string, time:datetime, quantity:int
 # Tertiary DB (NameBcode) stores data in the form: name:string, barcode:string
-import datetime
+from datetime import datetime
 import random
 import sys
 from tkinter import ttk
 import pymongo
 from matplotlib import pyplot as plt
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
+NavigationToolbar2Tk)
 import tkinter as tk
 from tkinter import *
+import tkcalendar as cal
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
@@ -464,7 +467,7 @@ class EditInv(tk.Tk):
         # need to add checks for updating name/barcode and changing quantity for stats
         if q != int(i["values"][2]):
             Stats.insert_one(
-                {"time": datetime.datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+                {"time": datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
         if n != str(i["values"][0]) or b != str(i["values"][1]):
 
             name_update = tk.messagebox.askquestion \
@@ -707,7 +710,11 @@ class GraphMenu(tk.Tk):
         # self.geometry("330x300")
         self.resizable(False, False)
         # Create frame to hold content of window
-        self.popup = None
+        self.popup_s = None
+        self.popup_p = None
+        self.popup_c = None
+        self.popup_g = None
+        self.popup_b = None
         b_frame = Frame(self)
         b_frame.grid(column=0, row=0, columnspan=5, rowspan=20, padx=25)
         b_frame.configure(bg="#d0fbff")
@@ -753,26 +760,259 @@ class GraphMenu(tk.Tk):
         self.lift()
 
     def stock_options(self):
-        self.popup = tk.Tk()
-        self.popup.wm_title("Stock Graph")
-        label = ttk.Label(self.popup, text="View graph for one product, or all?")
+        self.popup_s = tk.Tk()
+        self.popup_s.wm_title("Stock Graph")
+        label = ttk.Label(self.popup_s, text="View graph for one product, or all products?")
         label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(self.popup, text="One", )#command=self.stock_o_calender)
-        b2 = ttk.Button(self.popup, text="All", )#command=self.stock_a_calender)
+        b1 = ttk.Button(self.popup_s, text="One", command=lambda: self.calender_select(0, 0))
+        b2 = ttk.Button(self.popup_s, text="All", command=lambda: self.calender_select(1, 0))
         b1.pack()
         b2.pack()
-        self.popup.mainloop()
+        self.popup_s.mainloop()
 
     def prof_options(self):
-        self.popup = tk.Tk()
-        self.popup.wm_title("Profit Graph")
-        label = ttk.Label(self.popup, text="View graph for one product, or all?")
+        self.popup_p = tk.Tk()
+        self.popup_p.wm_title("Profit Graph")
+        label = ttk.Label(self.popup_p, text="View graph for one product, or all products?")
         label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(self.popup, text="One", )#command=self.prof_o_calender)
-        b2 = ttk.Button(self.popup, text="All", )#command=self.prof_a_calender)
+        b1 = ttk.Button(self.popup_p, text="One", command=lambda: self.calender_select(0, 1))
+        b2 = ttk.Button(self.popup_p, text="All", command=lambda: self.calender_select(1, 1))
         b1.pack()
         b2.pack()
-        self.popup.mainloop()
+        self.popup_p.mainloop()
+
+    def calender_select(self, typeA, typeB):
+        if typeB==0:
+            self.popup_s.destroy()
+        else:
+            self.popup_p.destroy()
+        self.popup_c = tk.Tk()
+        self.popup_c.wm_title("Select a starting point")
+        calender = cal.Calendar(self.popup_c, selectmode='day',
+                       year=2020, month=5,
+                       day=22)
+
+        calender.pack(pady=20)
+        label = ttk.Label(self.popup_c, text="Select a starting date for the graph.")
+        label.pack(side="top", fill="x", pady=10)
+        if typeA==1:
+            b1 = ttk.Button(self.popup_c, text="Submit", command=lambda: self.show_graph(calender.get_date(),
+                                                                                         typeA, typeB, 0))
+        else:
+            b1 = ttk.Button(self.popup_c, text="Submit", command=lambda: self.pick_code(calender.get_date(),
+                                                                                         typeA, typeB))
+        b1.pack()
+        self.popup_c.mainloop()
+
+
+    def pick_code(self, day, typeA, typeB):
+        self.popup_c.destroy()
+        self.popup_b = tk.Tk()
+        self.popup_b.wm_title("Enter Name/Barcode")
+        label = ttk.Label(self.popup_b, text="Please enter barcode/name of item to view.")
+        label.pack(side="top", fill="x", pady=10)
+        e1 = ttk.Entry(self.popup_b)
+        b1 = ttk.Button(self.popup_b, text="Submit",
+                        command=lambda: self.code_submit(day, typeA, typeB, e1.get()))
+        b1.pack()
+        e1.pack()
+        self.popup_b.mainloop()
+
+    def code_submit(self, day, typeA, typeB, code):
+        if not NameBcode.find_one({"name": code}) and not NameBcode.find_one({"barcode": code}):
+            tk.messagebox.showerror('Input Error', 'Error: name/barcode not found!')
+            self.popup_b.destroy()
+        else:
+            name = NameBcode.find_one({"name": code})
+            if name:
+                code = name["barcode"]
+            self.show_graph(day, typeA, typeB, code)
+
+    def show_graph(self, day, typeA, typeB, code):
+        if typeA==1:
+            self.popup_c.destroy()
+        else:
+            self.popup_b.destroy()
+        self.popup_g =tk.Tk()
+        start = datetime.strptime(day, "%m/%d/%y")
+        if typeB==0:
+            if typeA==0:
+                statsDict = Stats.find({"barcode": code})
+                times = []
+                quantities = []
+                for i in statsDict:
+                    if i["time"] >= start and datetime.now:
+                        times.append(i["time"])
+                        quantities.append(i["quantity"])
+                fig, ax = plt.subplots()
+                ax.plot(times, quantities, zorder=1)
+                ax.scatter(times, quantities, zorder=2, color='black')
+                item = NameBcode.find_one({"barcode": code})
+                self.popup_g.title('Inventory of ' + item["name"])
+                plt.title("Inventory of " + item["name"] + " Over Time")
+                plt.ylabel("Quantity")
+                plt.xlabel("Date/Time")
+                plt.grid()
+                plt.gcf().autofmt_xdate()
+                #plt.show()
+                frame = tk.Frame(self.popup_g)
+                canvas = FigureCanvasTkAgg(fig,
+                                           master=frame)
+                canvas.draw()
+                NavigationToolbar2Tk(canvas, frame)
+                # placing the canvas on the Tkinter window
+                canvas.get_tk_widget().pack()
+                frame.pack()
+
+            else:
+                #FIX THIS
+                bcodeDict = get_dat(NameBcode)
+                times = []
+                quantities = []
+
+                fig, ax = plt.subplots()
+                for j in bcodeDict:
+                    statsDict = Stats.find({"barcode": j["barcode"]})
+                    for i in statsDict:
+                        if i["time"] >= start and datetime.now:
+                            times.append(i["time"])
+                            quantities.append(i["quantity"])
+                    plt.plot(times, quantities, zorder=1, label=str(j["name"]))
+                    plt.scatter(times, quantities, zorder=2, color='black')
+                    times.clear()
+                    quantities.clear()
+
+                self.popup_g.title('Inventory Overall')
+                plt.title("Inventory Over Time")
+                plt.ylabel("Quantity")
+                plt.xlabel("Date/Time")
+                plt.grid()
+                plt.legend(loc='best')
+                plt.gcf().autofmt_xdate()
+                # plt.show()
+                frame = tk.Frame(self.popup_g)
+                canvas = FigureCanvasTkAgg(fig,
+                                           master=frame)
+                canvas.draw()
+                NavigationToolbar2Tk(canvas, frame)
+                # placing the canvas on the Tkinter window
+                canvas.get_tk_widget().pack()
+                frame.pack()
+        else:
+            if typeA == 0:
+                statsDict = Stats.find({"barcode": code})
+                times = [start]
+                profits = [0]
+                overall = 0.0
+                temp = 0
+                for i in statsDict:
+                    if i["time"] >= start and datetime.now:
+                        times.append(i["time"])
+                        change = temp - i["quantity"]
+                        if i["quantity"] < temp:
+                            overall += float(change) * float(i["r_price"])
+                            profits.append(overall)
+                        elif i["quantity"] > temp:
+                            overall += float(change) * float(i["w_price"])
+                            profits.append(overall)
+
+                        temp = i["quantity"]
+                fig, ax = plt.subplots()
+                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
+                    if y1 > y2:
+                        ax.plot([x1, x2], [y1, y2], 'r')
+                    elif y1 < y2:
+                        ax.plot([x1, x2], [y1, y2], 'g')
+                    else:
+                        ax.plot([x1, x2], [y1, y2], 'b')
+                ax.scatter(times, profits, zorder=2, color='black')
+                item = NameBcode.find_one({"barcode": code})
+
+                plt.suptitle("Profits of " + item["name"] + " Over Time")
+                plt.ylabel("Profit")
+                plt.xlabel("Date/Time")
+                if overall >= 0:
+                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
+                else:
+                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
+                plt.gcf().autofmt_xdate()
+                plt.grid()
+                #plt.show()
+                frame = tk.Frame(self.popup_g)
+                canvas = FigureCanvasTkAgg(fig,
+                                           master=frame)
+                canvas.draw()
+                NavigationToolbar2Tk(canvas, frame)
+                # placing the canvas on the Tkinter window
+                canvas.get_tk_widget().pack()
+                frame.pack()
+            else: #NEED TO FIX PLOTTING, PLOTS DATES OUT OF ORDER
+                bcodeDict = get_dat(NameBcode)
+                times = [start]
+                profits = [0]
+                profit_per=[]
+                overall = 0.0
+                overall_per = 0.0
+                temp = 0
+                for j in bcodeDict:
+                    statsDict = Stats.find({"barcode": j["barcode"]})
+                    for i in statsDict:
+                        if i["time"] >= start and datetime.now:
+                            times.append(i["time"])
+                            change = temp - i["quantity"]
+                            if i["quantity"] < temp:
+                                overall_per = float(change) * float(i["r_price"])
+                                overall += overall_per
+                                profit_per.append(overall_per)
+                                profits.append(overall)
+                                overall_per = 0.0
+                            elif i["quantity"] > temp:
+                                overall_per = float(change) * float(i["w_price"])
+                                overall += overall_per
+                                profit_per.append(overall_per)
+                                profits.append(overall)
+                                overall_per = 0.0
+
+                            temp = i["quantity"]
+                    temp=0
+                prof_time = zip(profits, times)
+                sorted(prof_time, key=lambda x: x[1])
+                prof_sorted = [profits for times, profits in prof_time]
+                times_sorted = [times for profits, times in prof_time]
+                fig, ax = plt.subplots()
+                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
+                    if y1 > y2:
+                        ax.plot([x1, x2], [y1, y2], 'r')
+                    elif y1 < y2:
+                        ax.plot([x1, x2], [y1, y2], 'g')
+                    else:
+                        ax.plot([x1, x2], [y1, y2], 'b')
+                ax.scatter(times, profits, zorder=2, color='black')
+
+                plt.suptitle("Overall Profits Over Time")
+                plt.ylabel("Profit")
+                plt.xlabel("Date/Time")
+                if overall >= 0:
+                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
+                else:
+                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
+                plt.gcf().autofmt_xdate()
+                plt.grid()
+                # plt.show()
+                plt.gcf().autofmt_xdate()
+                # plt.show()
+                frame = tk.Frame(self.popup_g)
+                canvas = FigureCanvasTkAgg(fig,
+                                           master=frame)
+                canvas.draw()
+                NavigationToolbar2Tk(canvas, frame)
+                # placing the canvas on the Tkinter window
+                canvas.get_tk_widget().pack()
+                frame.pack()
+
+        b1 = ttk.Button(self.popup_g, text="Close", command=self.popup_g.destroy)
+        b1.pack()
+
 
     def close_win(self):
         self.main_window.deiconify()

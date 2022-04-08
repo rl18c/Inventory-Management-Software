@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+from datetime import datetime
 import random
 import sys
 from tkinter import ttk
@@ -202,12 +203,14 @@ def get_stats_stock(code):
             times.append(i["time"])
             quantities.append(i["quantity"])
     fig, ax = plt.subplots()
-    ax.plot(times, quantities)
+    ax.plot(times, quantities, zorder=1)
+    ax.scatter(times, quantities, zorder=2, color='black')
     item = NameBcode.find_one({"barcode": code})
 
     plt.title("Inventory of " + item["name"] + " Over Time")
     plt.ylabel("Quantity")
     plt.xlabel("Date/Time")
+    plt.grid()
     plt.gcf().autofmt_xdate()
     plt.show()
     return 0
@@ -221,7 +224,7 @@ def get_stats_prof(code):
     overall = 0.0
     temp = 0
     for i in statsDict:
-        if i["time"] >= start and datetime.now:
+        if i["time"] >= start and datetime.now():
             times.append(i["time"])
             change = temp - i["quantity"]
             if i["quantity"] < temp:
@@ -272,7 +275,8 @@ def test_graphs():
     d = datetime.timedelta(days=2)
     NameBcode.insert_one({"name": "TEST", "barcode": "0"})
     while start <= end:
-        Stats.insert_one({"time": str(start), "barcode": "0", "quantity": random.randrange(0, 20)})
+        Stats.insert_one({"time": str(start), "barcode": "0", "quantity": random.randrange(0, 20),
+                          "r_price": 5.00, "w_price": 3.99})
         start += d
     get_stats_stock("0")
     clear_dat()
