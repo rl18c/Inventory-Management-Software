@@ -865,7 +865,6 @@ class GraphMenu(tk.Tk):
                 frame.pack()
 
             else:
-                #FIX THIS
                 bcodeDict = get_dat(NameBcode)
                 times = []
                 quantities = []
@@ -946,11 +945,11 @@ class GraphMenu(tk.Tk):
                 # placing the canvas on the Tkinter window
                 canvas.get_tk_widget().pack()
                 frame.pack()
-            else: #NEED TO FIX PLOTTING, PLOTS DATES OUT OF ORDER
+            else:
                 bcodeDict = get_dat(NameBcode)
                 times = [start]
                 profits = [0]
-                profit_per=[]
+                profit_per={}
                 overall = 0.0
                 overall_per = 0.0
                 temp = 0
@@ -961,25 +960,38 @@ class GraphMenu(tk.Tk):
                             times.append(i["time"])
                             change = temp - i["quantity"]
                             if i["quantity"] < temp:
-                                overall_per = float(change) * float(i["r_price"])
-                                overall += overall_per
-                                profit_per.append(overall_per)
+                                overall_per += float(change) * float(i["r_price"])
+                                overall += float(change) * float(i["r_price"])
                                 profits.append(overall)
-                                overall_per = 0.0
                             elif i["quantity"] > temp:
-                                overall_per = float(change) * float(i["w_price"])
-                                overall += overall_per
-                                profit_per.append(overall_per)
+                                overall_per += float(change) * float(i["w_price"])
+                                overall += float(change) * float(i["r_price"])
                                 profits.append(overall)
-                                overall_per = 0.0
 
                             temp = i["quantity"]
+                    profit_per[j["name"]] = overall_per
+                    overall_per = 0.0
                     temp=0
-                prof_time = zip(profits, times)
-                sorted(prof_time, key=lambda x: x[1])
-                prof_sorted = [profits for times, profits in prof_time]
-                times_sorted = [times for profits, times in prof_time]
+                least=10000.0
+                least_name = "NULL"
+                most=0.0
+                most_name = "NULL"
+                for key, value in profit_per.items():
+                    if value < least:
+                        least = value
+                        least_name = key
+                    if value > most:
+                        most = value
+                        most_name = key
+
+                label = ttk.Label(self.popup_g, text="Least Profitable Product: " + least_name + ": $" +
+                                                     "{:.2f}".format(least) + "\nMost Profitable Product: "
+                                                     + most_name + ": $" + "{:.2f}".format(most))
+                label.pack(side="bottom", fill="x", pady=10)
+
+                times, profits = zip(*sorted(zip(times, profits)))
                 fig, ax = plt.subplots()
+                #MAYBE ADD WATERFALL?
                 for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
                     if y1 > y2:
                         ax.plot([x1, x2], [y1, y2], 'r')
@@ -1011,7 +1023,7 @@ class GraphMenu(tk.Tk):
                 frame.pack()
 
         b1 = ttk.Button(self.popup_g, text="Close", command=self.popup_g.destroy)
-        b1.pack()
+        b1.pack(side="bottom")
 
 
     def close_win(self):
