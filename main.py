@@ -12,7 +12,7 @@ from tkinter import ttk
 import pymongo
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
-NavigationToolbar2Tk)
+                                               NavigationToolbar2Tk)
 import tkinter as tk
 from tkinter import *
 import tkcalendar as cal
@@ -79,275 +79,195 @@ def barcode():
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("500x220")
+        # self.geometry("500x220")
         self.title("Inventory Manager")
         self.resizable(False, False)
         self.configure(bg="#d0fbff")
 
-        # Initializes label and buttons on main screen
-        self.initialize_components()
-
-        col, row = self.grid_size()
-        for c in range(col):
-            self.grid_columnconfigure(c, minsize=100)
-
-    def initialize_components(self):
-        # Title Label
-        title_label = Label(self, text="Select an Action",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
-        title_label.grid(row=0, column=1, columnspan=3, sticky=EW, pady=10)
-
-        # HERE WE DEFINE 4 FRAMES TO ACT AS BUTTON BORDERS
-        # Button Frame 1
-        but1_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but1_border.grid(column=0, row=1, columnspan=2, sticky=W, padx=25, pady=10)
-        # Button Frame 2
-        but2_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but2_border.grid(column=0, row=3, columnspan=2, sticky=W, padx=25, pady=10)
-        # Button Frame 3
-        but3_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but3_border.grid(column=0, row=5, columnspan=2, sticky=W, padx=25, pady=10)
-        # Button Frame 4
-        but4_border = Frame(self, highlightthickness=2, highlightbackground="#d10000")
-        but4_border.grid(column=3, row=5, columnspan=2, padx=25)
-        # Button Frame 4
-        but5_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but5_border.grid(column=2, row=3, columnspan=2, sticky=W, padx=25, pady=10)
-
-        # Add Data Button
-        add_butt = Button(but1_border, text="Add to Inventory",
-                          bg="white",
-                          borderwidth=0,
-                          font=("Helvetica", 11),
-                          command=self.inv_add)
-        add_butt.grid()
-        add_butt.config(width=18)
-
-        # Show Inventory Button
-        show_butt = Button(but2_border, text="Show Inventory",
-                           bg="white",
-                           font=("Helvetica", 11),
-                           borderwidth=0)
-        show_butt.grid()
-        show_butt.config(width=18)
-
-        # Modify Button
-        mod_butt = Button(but3_border, text="Modify Inventory", command=self.inv_edit,
-                           bg="white",
-                           font=("Helvetica", 11),
-                           borderwidth=0)
-        mod_butt.grid()
-        mod_butt.config(width=18)
-
-        graph_butt = Button(but5_border, text="Show Graphs", command=self.graph_menu,
-                           bg="white",
-                           font=("Helvetica", 11),
-                           borderwidth=0)
-        graph_butt.grid()
-        graph_butt.config(width=18)
-        # Close Window Button
-        close_butt = Button(but4_border, text="Close Manager",
-                            bg="white",
-                            font=("Helvetica", 11),
-                            command=self.close_main,
-                            borderwidth=0)
-        close_butt.grid()
-
-
-    def graph_menu(self):
-        # Hides Original window while modifying
-        self.withdraw()
-
-        graphm = GraphMenu(self)
-
-    def inv_edit(self):
-        # Hides Original window while modifying
-        self.withdraw()
-        # This is where we must open new window to edit Inventory DB
-        show = EditInv(self)
-
-    def inv_add(self):
-        print("Accessing Inventory...")
-
-        # Hides Original window while modifying
-        self.withdraw()
-
-        # This is where we must open new window to add Inventory DB
-        addn = AddNew(self)
-
-    def close_main(self):
-        self.destroy()
-
-# Testing Data
-head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
-test_entries = [
-("Name1","Barcode1","Quantity1","rPrice1", "wPrice1") ,
-("Name2","Barcode2","Quantity2","rPrice2", "wPrice2") ,
-("Name3","Barcode3","Quantity3","rPrice3", "wPrice3") ,
-("Name4","Barcode4","Quantity4","rPrice4", "wPrice4") ,
-("Name5","Barcode5","Quantity5","rPrice5", "wPrice5") ,
-("Name6","Barcode6","Quantity6","rPrice6", "wPrice6") ,
-("Name7","Barcode7","Quantity7","rPrice7", "wPrice7") ,
-("Name8","Barcode8","Quantity8","rPrice8", "wPrice8") ,
-("Name9","Barcode9","Quantity9","rPrice9", "wPrice9") ,
-("Name10","Barcode10","Quantity10","rPrice10", "wPrice10"),
-("Name1","Barcode1","Quantity1","rPrice1", "wPrice1") ,
-("Name2","Barcode2","Quantity2","rPrice2", "wPrice2") ,
-("Name3","Barcode3","Quantity3","rPrice3", "wPrice3") ,
-("Name4","Barcode4","Quantity4","rPrice4", "wPrice4") ,
-("Name5","Barcode5","Quantity5","rPrice5", "wPrice5") ,
-("Name6","Barcode6","Quantity6","rPrice6", "wPrice6") ,
-("Name7","Barcode7","Quantity7","rPrice7", "wPrice7") ,
-("Name8","Barcode8","Quantity8","rPrice8", "wPrice8") ,
-("Name9","Barcode9","Quantity9","rPrice9", "wPrice9") ,
-("Name10","Barcode10","Quantity10","rPrice10", "wPrice10")
-]
-
-
-class EditInv(tk.Tk):
-    def __init__(self, mas):
-        super().__init__()
-        self.main_window = mas
-        self.configure(bg="#d0fbff")
-        self.title("Data Modification")
-        self.resizable(False, False)
-
-        # Initializes instance attributes
-        self.main_frame = None
-        self.up_frame = None
-        self.tree = None
-        self.text = None
-        self.scroll = None
+        # Initializing all instance attributes
+        # Init Buttons
+        self.rem_butt = None
+        self.mod_butt = None
         self.up_butt = None
-        self.cur = None
-        self.modifying = None
+        self.add_butt = None
+        self.g_all_butt = None
+        self.g_sel_butt = None
+        self.close_butt = None
+
+        # Init Editing widgets
+        self.tree_frame = None
+        self.entry_frame = None
+        self.tree = None
+        self.scroll = None
+        # Entry Labels
         self.n_lbl = None
         self.b_lbl = None
         self.q_lbl = None
         self.rp_lbl = None
         self.wp_lbl = None
+        # Entry boxes
         self.n_entry = None
         self.b_entry = None
         self.q_entry = None
         self.rp_entry = None
         self.wp_entry = None
+        # Vars keeping track of modification state and Current working entry
+        self.cur = None
+        self.modifying = None
+        # String Vars
         self.n_str = StringVar(self)
         self.b_str = StringVar(self)
         self.q_str = StringVar(self)
         self.rp_str = StringVar(self)
         self.wp_str = StringVar(self)
 
-        # Initialize window components
-        self.init_components()
+        # Initializes main screen
+        self.init_buttons()
+        self.init_edit_view()
+
+        # Initially disable modification text_boxes
+        self.disable_entries()
 
         col, row = self.grid_size()
-        for c in range(col):
-            self.grid_columnconfigure(c, minsize=25)
-        for r in range(row):
-            self.grid_rowconfigure(r, minsize=20)
-        # Add Label and Button to EDIT window
-        # mod_label = Label(self, text="Which database Would you like to view?")
-        # mod_label.grid(row=0)
-        # out = Label(edit, text=output).grid(row=1)
-        # inv_butt = Button(self, text="Inventory", command=lambda: inv())
-        # inv_butt.grid(row=1)
-        # stat_butt = Button(self, text="Statistics", command=lambda: stat())
-        # stat_butt.grid(row=2)
-        # bcode_butt = Button(self, text="Barcodes", command=lambda: barcode())
-        # bcode_butt.grid(row=3)
-        # back_butt = Button(self, text="Go Back", command=self.close_win)
-        # back_butt.grid(row=4)
+        #for c in range(col):
+            #self.grid_columnconfigure(c, minsize=30)
 
-    def init_components(self):
-        # Adds modification widgets to the grid
-        def show_widgets():
-            self.n_lbl.grid()
-            self.b_lbl.grid()
-            self.q_lbl.grid()
-            self.rp_lbl.grid()
-            self.wp_lbl.grid()
-            self.n_entry.grid()
-            self.b_entry.grid()
-            self.q_entry.grid()
-            self.rp_entry.grid()
-            self.wp_entry.grid()
-            self.up_butt.grid()
+    def init_buttons(self):
+        # Define 7 borders for each button
+        # Remove button border
+        rem_bord = Frame(self, highlightthickness=2, highlightbackground="#eb7d34")
+        rem_bord.grid(column=0, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Modify button Border
+        mod_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        mod_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Update button border
+        up_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        up_bord.grid(column=6, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Add button border
+        add_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Graph all button border
+        g_all_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Graph selection button border
+        g_sel_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        g_sel_bord.grid(column=11, row=10, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Close button border
+        close_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
+        close_bord.grid(column=11, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
 
-        # Function to handle user modifying selection
-        def mod_clicked():
-            if self.cur:
-                i = self.tree.item(self.cur)
-                self.n_str.set(i["values"][0])
-                self.b_str.set(i["values"][1])
-                self.q_str.set(i["values"][2])
-                self.rp_str.set(i["values"][3][1:])
-                self.wp_str.set(i["values"][4][1:])
-                self.modifying = True
-                show_widgets()
+        # Adding buttons to frames
 
-        # Function called when user selects different item
-        def select_changed(event):
-            if self.modifying:
-                if tk.messagebox.askyesno(title="Switch",
-                        message="Are you sure you want to terminate modifications?"):
-                    self.cur = self.tree.focus()
-                    self.n_str.set("")
-                    self.b_str.set("")
-                    self.q_str.set("")
-                    self.rp_str.set("")
-                    self.wp_str.set("")
-                    self.modifying = False
-                    self.hide_widgets()
-            else:
-                self.cur = self.tree.focus()
+        # Remove button
+        self.rem_butt = Button(rem_bord, text="Remove Selected Item",
+                               bg="white",
+                               font=("Helvetica", 11),
+                               borderwidth=0,
+                               command=self.db_remove)
+        self.rem_butt.grid()
+        self.rem_butt.config(width=18)
 
+        # Modify Button
+        self.mod_butt = Button(mod_bord, text="Modify Selected Item",
+                               bg="white",
+                               font=("Helvetica", 11),
+                               borderwidth=0,
+                               command=self.modify_clicked)
+        self.mod_butt.grid()
+        self.mod_butt.config(width=18)
+
+        # Update Button
+        self.up_butt = Button(up_bord, text="Update Item",
+                              bg="white",
+                              font=("Helvetica", 11),
+                              borderwidth=0,
+                              command=self.db_update)
+        self.up_butt.grid()
+        self.up_butt.config(width=18)
+
+        # Add Data Button
+        self.add_butt = Button(add_bord, text="Add New Item",
+                               bg="white",
+                               borderwidth=0,
+                               font=("Helvetica", 11),
+                               command=self.inv_add)
+        self.add_butt.grid()
+        self.add_butt.config(width=18)
+
+        # Graph All button
+        self.g_all_butt = Button(g_all_bord, text="Graph All",
+                                 bg="white",
+                                 borderwidth=0,
+                                 font=("Helvetica", 11),
+                                 command=self.graph_menu)
+        self.g_all_butt.grid()
+        self.g_all_butt.config(width=18)
+
+        # Graph Selection button
+        self.g_sel_butt = Button(g_sel_bord, text="Graph Selection", state="disabled",
+                                 bg="white",
+                                 borderwidth=0,
+                                 font=("Helvetica", 11),
+                                 command=lambda: self.graph_menu(str(self.tree.item(self.cur)["values"][1])))
+        self.g_sel_butt.grid()
+        self.g_sel_butt.config(width=18)
+
+        # Close Manager Button
+        self.close_butt = Button(close_bord, text="Close Manager",
+                                 bg="white",
+                                 font=("Helvetica", 11),
+                                 command=self.close_main,
+                                 borderwidth=0)
+        self.close_butt.grid()
+        self.close_butt.config(width=18)
+
+    def init_edit_view(self):
         # Create db_list outer frame
-        self.main_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        self.main_frame.grid_rowconfigure(0, weight=1)
-        self.main_frame.grid_columnconfigure(0, weight=1)
-        self.main_frame.grid(column=1, row=0, columnspan=5, rowspan=16, sticky=W, padx=25, pady=10)
+        self.tree_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        self.tree_frame.grid_rowconfigure(0, weight=1)
+        self.tree_frame.grid_columnconfigure(0, weight=1)
+        self.tree_frame.grid(column=1, row=3, columnspan=4, rowspan=15, sticky=W, padx=25, pady=10)
 
         # Create frame for updating an entry
-        self.up_frame = Frame(self, bg="#d0fbff")
-        self.up_frame.grid_rowconfigure(0, weight=1)
-        self.up_frame.grid_columnconfigure(0, weight=1)
-        self.up_frame.grid(column=7, row=1, columnspan=5, rowspan=14, sticky=W, padx=25, pady=10)
+        self.entry_frame = Frame(self, bg="#d0fbff")
+        self.entry_frame.grid_rowconfigure(0, weight=1)
+        self.entry_frame.grid_columnconfigure(0, weight=1)
+        self.entry_frame.grid(column=6, row=3, columnspan=5, rowspan=15, sticky=W, padx=25, pady=10)
 
         # Create 5 labels for up_frame
-        self.n_lbl = Label(self.up_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
-        self.n_lbl.grid(row=2, column=7, sticky=E)
-        self.b_lbl = Label(self.up_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
-        self.b_lbl.grid(row=5, column=7, sticky=E)
-        self.q_lbl = Label(self.up_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
-        self.q_lbl.grid(row=8, column=7, sticky=E)
-        self.rp_lbl = Label(self.up_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
-        self.rp_lbl.grid(row=11, column=7, sticky=E)
-        self.wp_lbl = Label(self.up_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
-        self.wp_lbl.grid(row=14, column=7, sticky=E)
+        self.n_lbl = Label(self.entry_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        self.n_lbl.grid(row=5, column=6, sticky=E)
+        self.b_lbl = Label(self.entry_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        self.b_lbl.grid(row=8, column=6, sticky=E)
+        self.q_lbl = Label(self.entry_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        self.q_lbl.grid(row=11, column=6, sticky=E)
+        self.rp_lbl = Label(self.entry_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.rp_lbl.grid(row=14, column=6, sticky=E)
+        self.wp_lbl = Label(self.entry_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.wp_lbl.grid(row=17, column=6, sticky=E)
+
+        # Create Entry Information Label
+        entry_lbl = Label(self.entry_frame, text="Current Entry Information", font=("Helvetica", 13), bg="#d0fbff")
+        entry_lbl.grid(row=3, column=7, columnspan=3, rowspan=2, sticky=N)
+
+        # Create Title Label for screen
+        entry_lbl = Label(self, text="Inventory Tracker", font=("Helvetica", 20), bg="#d0fbff")
+        entry_lbl.grid(row=0, column=2, columnspan=8, rowspan=2, sticky=S)
 
         # Create 5 Entry boxes for up_frame
-        self.n_entry = Entry(self.up_frame, textvariable=self.n_str)
-        self.n_entry.grid(row=2, column=8, columnspan=4, pady=15)
-        self.b_entry = Entry(self.up_frame, textvariable=self.b_str)
-        self.b_entry.grid(row=5, column=8, columnspan=4, pady=15)
-        self.q_entry = Entry(self.up_frame, textvariable=self.q_str)
-        self.q_entry.grid(row=8, column=8, columnspan=4, pady=15)
-        self.rp_entry = Entry(self.up_frame, textvariable=self.rp_str)
-        self.rp_entry.grid(row=11, column=8, columnspan=4, pady=15)
-        self.wp_entry = Entry(self.up_frame, textvariable=self.wp_str)
-        self.wp_entry.grid(row=14, column=8, columnspan=4, pady=15)
-
-        # Adding traces to StringVars
-        self.n_str.trace("w", self.ok_to_add)
-        self.b_str.trace("w", self.ok_to_add)
-        self.q_str.trace("w", self.ok_to_add)
-        self.rp_str.trace("w", self.ok_to_add)
-        self.wp_str.trace("w", self.ok_to_add)
+        self.n_entry = Entry(self.entry_frame, textvariable=self.n_str)
+        self.n_entry.grid(row=5, column=7, columnspan=4, pady=15)
+        self.b_entry = Entry(self.entry_frame, textvariable=self.b_str)
+        self.b_entry.grid(row=8, column=7, columnspan=4, pady=15)
+        self.q_entry = Entry(self.entry_frame, textvariable=self.q_str)
+        self.q_entry.grid(row=11, column=7, columnspan=4, pady=15)
+        self.rp_entry = Entry(self.entry_frame, textvariable=self.rp_str)
+        self.rp_entry.grid(row=14, column=7, columnspan=4, pady=15)
+        self.wp_entry = Entry(self.entry_frame, textvariable=self.wp_str)
+        self.wp_entry.grid(row=17, column=7, columnspan=4, pady=15)
 
         # Create text area for db entries
-        self.tree = ttk.Treeview(self.main_frame, columns=head, show="headings",
+        self.tree = ttk.Treeview(self.tree_frame, columns=head, show="headings",
                                  selectmode="browse",
                                  height=16)
         # Define each column's width
@@ -356,15 +276,16 @@ class EditInv(tk.Tk):
         self.tree.column("Quantity", anchor=CENTER, width=70)
         self.tree.column("r_price", anchor=CENTER, width=75)
         self.tree.column("w_price", anchor=CENTER, width=95)
+
         # Define heading's text
         self.tree.heading("Name", text="Name")
         self.tree.heading("Barcode", text="Barcode")
         self.tree.heading("Quantity", text="Quantity")
         self.tree.heading("r_price", text="Retail Price")
         self.tree.heading("w_price", text="Wholesale Price")
-        self.tree.grid(row=0, column=2, columnspan=3, sticky="nsew", pady=2, padx=2)
+        self.tree.grid(row=3, column=1, columnspan=4, sticky="nsew", pady=5, padx=5)
         # Binding a selection change to function
-        self.tree.bind("<<TreeviewSelect>>", select_changed)
+        self.tree.bind("<<TreeviewSelect>>", self.select_changed)
 
         data = get_dat(Inventory)
         # Populating with database data
@@ -374,41 +295,49 @@ class EditInv(tk.Tk):
             self.tree.insert("", END, values=l)
 
         # Create scrollbar on right side
-        self.scroll = Scrollbar(self.main_frame, orient="vertical", command=self.tree.yview)
-        self.scroll.grid(row=0, column=5, rowspan=16, sticky="nse")
+        self.scroll = Scrollbar(self.tree_frame, orient="vertical", command=self.tree.yview)
+        self.scroll.grid(row=3, column=5, rowspan=16, sticky="nse")
         self.tree.config(yscrollcommand=self.scroll.set)
 
-        # Create and place 'Remove' and 'Modify' buttons
-        rem_butt = Button(self, text="Remove Selected Item", command=self.db_remove)
-        rem_butt.grid(row=17, column=1, rowspan=2, columnspan=2, sticky=W)
+    # Called when 'Modify Selected Item' is clicked
+    def modify_clicked(self):
+        if self.cur:
+            self.modifying = True
+            self.enable_modifications()
+        else:
+            tk.messagebox.showerror(title="No Selection", message="No selected item to modify.")
 
-        mod_butt = Button(self, text="Modify Selected Item", command=mod_clicked)
-        mod_butt.grid(row=17, column=4, rowspan=2, columnspan=2, sticky=W)
+    # Called everytime selection in treeview changes
+    def select_changed(self, event):
+        self.g_sel_butt["state"] = "normal"
+        if self.modifying:
+            if tk.messagebox.askyesno(title="Switch",
+                                      message="Are you sure you want to terminate modifications?"):
+                self.cur = self.tree.focus()
+                i = self.tree.item(self.cur)
+                self.n_str.set(i["values"][0])
+                self.b_str.set(i["values"][1])
+                self.q_str.set(i["values"][2])
+                self.rp_str.set(i["values"][3][1:])
+                self.wp_str.set(i["values"][4][1:])
+                self.modifying = False
+                self.disable_modifications()
+        elif self.tree.focus():
+            self.cur = self.tree.focus()
+            i = self.tree.item(self.cur)
+            self.n_str.set(i["values"][0])
+            self.b_str.set(i["values"][1])
+            self.q_str.set(i["values"][2])
+            self.rp_str.set(i["values"][3][1:])
+            self.wp_str.set(i["values"][4][1:])
+        else:
+            self.n_str.set("")
+            self.b_str.set("")
+            self.q_str.set("")
+            self.rp_str.set("")
+            self.wp_str.set("")
 
-        # Create Update Item button
-        self.up_butt = Button(self, text="Update Item", state="disabled", command=self.db_update)
-        self.up_butt.grid(row=17, column=7, rowspan=2, columnspan=2, sticky=W)
-
-        back_butt = Button(self, text="Go Back", command=self.close_win)
-        back_butt.grid(row=17, column=10, rowspan=2, columnspan=2, padx=20)
-
-        # Here we hide the modification widgets
-        self.hide_widgets()
-
-    # Will hide a modification widgets
-    def hide_widgets(self):
-        self.n_lbl.grid_remove()
-        self.b_lbl.grid_remove()
-        self.q_lbl.grid_remove()
-        self.rp_lbl.grid_remove()
-        self.wp_lbl.grid_remove()
-        self.n_entry.grid_remove()
-        self.b_entry.grid_remove()
-        self.q_entry.grid_remove()
-        self.rp_entry.grid_remove()
-        self.wp_entry.grid_remove()
-        self.up_butt.grid_remove()
-
+    # Called when user clicks Remove Item
     def db_remove(self):
         if self.cur:
             i = self.tree.item(self.cur)
@@ -430,6 +359,7 @@ class EditInv(tk.Tk):
         else:
             tk.messagebox.showerror(title="No Selection", message="No selected item to remove.")
 
+    # Called when user clicks Update Item
     def db_update(self):
         # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
         if not self.b_str.get().isdigit():
@@ -457,7 +387,6 @@ class EditInv(tk.Tk):
                                             "hundredth place.")
             return
         # Here we have a valid item to get added (MUST ADD AND SET modifying=false)
-        self.modifying = False
         i = self.tree.item(self.cur)
         n = str(self.n_str.get())
         b = str(self.b_str.get())
@@ -484,7 +413,7 @@ class EditInv(tk.Tk):
                         # Column integer to match the column which was clicked in the table
                         entries = self.tree.get_children()
 
-                        for item in entries: #NEED TO UPDATE VIEW (this does not work)
+                        for item in entries:  # NEED TO UPDATE VIEW (this does not work)
                             if str(self.tree.item(item)['values'][1]) == b:
                                 self.tree.item(item)['values'][1] = str(i["values"][1])
                                 break
@@ -496,8 +425,8 @@ class EditInv(tk.Tk):
 
                 NameBcode.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b}})
                 Inventory.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b,
-                                                                                 "quantity": q, "r_price": rp,
-                                                                                 "w_price": wp}})
+                                                                              "quantity": q, "r_price": rp,
+                                                                              "w_price": wp}})
                 Stats.update_many({"barcode": str(i["values"][1])}, {"$set": {"barcode": b}})
                 if barcode_update:
                     Stats.update_many({"barcode": "placeholder"}, {"$set": {"barcode": str(i["values"][1])}})
@@ -505,19 +434,93 @@ class EditInv(tk.Tk):
                               "barcode": str(i["values"][1])}, {"$set": {"name": n, "barcode": b,
                                                                          "quantity": q, "r_price": rp, "w_price": wp}})
         self.tree.item(self.cur, values=(n, b, str(q), '$' + "{:.2f}".format(rp), '$' + "{:.2f}".format(wp)))
-        self.hide_widgets()
+        self.modifying = False
+        self.disable_modifications()
         tk.messagebox.showinfo(title="Item Update",
-                                message="Item : " + self.n_str.get() + " has been updated.")
+                               message="Item : " + self.n_str.get() + " has been updated.")
 
-    def ok_to_add(self, var, index, mode):
-        if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.rp_str.get() and self.wp_str.get():
-            self.up_butt.config(state="normal")
-        else:
-            self.up_butt.config(state="disabled")
+    # Called when user want to modify something
+    def enable_modifications(self):
+        # Enable all entry boxes
+        self.n_entry["state"] = "normal"
+        self.b_entry["state"] = "normal"
+        self.q_entry["state"] = "normal"
+        self.rp_entry["state"] = "normal"
+        self.wp_entry["state"] = "normal"
+        # Enable Update Item button
+        self.up_butt["state"] = "normal"
+        # Disable all other buttons
+        self.add_butt["state"] = "disabled"
+        self.g_all_butt["state"] = "disabled"
+        self.g_sel_butt["state"] = "disabled"
+        self.mod_butt["state"] = "disabled"
+        self.rem_butt["state"] = "disabled"
 
-    def close_win(self):
-        self.main_window.deiconify()
+    # Called when user finishes modifications
+    def disable_modifications(self):
+        # Enable all other buttons
+        self.add_butt["state"] = "normal"
+        self.g_all_butt["state"] = "normal"
+        self.g_sel_butt["state"] = "normal"
+        self.mod_butt["state"] = "normal"
+        self.rem_butt["state"] = "normal"
+        # Disable entry boxes and Update button
+        self.disable_entries()
+
+    # Function to disable entry boxes and disable Update Item button
+    def disable_entries(self):
+        self.n_entry["state"] = "disabled"
+        self.b_entry["state"] = "disabled"
+        self.q_entry["state"] = "disabled"
+        self.rp_entry["state"] = "disabled"
+        self.wp_entry["state"] = "disabled"
+        self.up_butt["state"] = "disabled"
+
+    # Called by both Graphing Buttons
+    def graph_menu(self, item_bcode=None):
+        # Hides Original window while modifying
+        if self.cur is not None:
+            self.withdraw()
+            graphm = GraphMenu(self, item_bcode)
+        elif item_bcode is None:
+            self.withdraw()
+            graphm = GraphMenu(self, item_bcode)
+
+    # Called by Add Item Button
+    def inv_add(self):
+        # Hides Original window while modifying
+        self.withdraw()
+        # This is where we must open new window to add Inventory DB
+        addn = AddNew(self)
+
+    def close_main(self):
         self.destroy()
+
+
+# Testing Data
+head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
+test_entries = [
+    ("Name1", "Barcode1", "Quantity1", "rPrice1", "wPrice1"),
+    ("Name2", "Barcode2", "Quantity2", "rPrice2", "wPrice2"),
+    ("Name3", "Barcode3", "Quantity3", "rPrice3", "wPrice3"),
+    ("Name4", "Barcode4", "Quantity4", "rPrice4", "wPrice4"),
+    ("Name5", "Barcode5", "Quantity5", "rPrice5", "wPrice5"),
+    ("Name6", "Barcode6", "Quantity6", "rPrice6", "wPrice6"),
+    ("Name7", "Barcode7", "Quantity7", "rPrice7", "wPrice7"),
+    ("Name8", "Barcode8", "Quantity8", "rPrice8", "wPrice8"),
+    ("Name9", "Barcode9", "Quantity9", "rPrice9", "wPrice9"),
+    ("Name10", "Barcode10", "Quantity10", "rPrice10", "wPrice10"),
+    ("Name1", "Barcode1", "Quantity1", "rPrice1", "wPrice1"),
+    ("Name2", "Barcode2", "Quantity2", "rPrice2", "wPrice2"),
+    ("Name3", "Barcode3", "Quantity3", "rPrice3", "wPrice3"),
+    ("Name4", "Barcode4", "Quantity4", "rPrice4", "wPrice4"),
+    ("Name5", "Barcode5", "Quantity5", "rPrice5", "wPrice5"),
+    ("Name6", "Barcode6", "Quantity6", "rPrice6", "wPrice6"),
+    ("Name7", "Barcode7", "Quantity7", "rPrice7", "wPrice7"),
+    ("Name8", "Barcode8", "Quantity8", "rPrice8", "wPrice8"),
+    ("Name9", "Barcode9", "Quantity9", "rPrice9", "wPrice9"),
+    ("Name10", "Barcode10", "Quantity10", "rPrice10", "wPrice10")
+]
 
 
 class AddNew(tk.Tk):
@@ -647,7 +650,7 @@ class AddNew(tk.Tk):
         if not x and not y:
             Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
 
-        Stats.insert_one({"time": datetime.datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+        Stats.insert_one({"time": datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
 
         tk.messagebox.showinfo(
             title='Success',
@@ -702,19 +705,18 @@ class AddNew(tk.Tk):
 
 
 class GraphMenu(tk.Tk):
-    def __init__(self, mas):
+    def __init__(self, mas, item_bcode=None):
         super().__init__()
         self.main_window = mas
         self.configure(bg="#d0fbff")
-        self.title("New Item")
+        self.title("Choose Option")
         # self.geometry("330x300")
         self.resizable(False, False)
         # Create frame to hold content of window
-        self.popup_s = None
-        self.popup_p = None
         self.popup_c = None
         self.popup_g = None
-        self.popup_b = None
+        # Initialize selections barcode
+        self.sel_barcode = item_bcode
         b_frame = Frame(self)
         b_frame.grid(column=0, row=0, columnspan=5, rowspan=20, padx=25)
         b_frame.configure(bg="#d0fbff")
@@ -741,13 +743,13 @@ class GraphMenu(tk.Tk):
                              bg="white",
                              borderwidth=0,
                              font=("Helvetica", 11),
-                             command = self.stock_options)
+                             command=self.stock_options)
         self.s_butt.grid()
         self.p_butt = Button(p_border, text="Profit Graph",
                              bg="white",
                              borderwidth=0,
                              font=("Helvetica", 11),
-                             command = self.prof_options)
+                             command=self.prof_options)
         self.p_butt.grid()
 
         # Go Back Button
@@ -760,83 +762,42 @@ class GraphMenu(tk.Tk):
         self.lift()
 
     def stock_options(self):
-        self.popup_s = tk.Tk()
-        self.popup_s.wm_title("Stock Graph")
-        label = ttk.Label(self.popup_s, text="View graph for one product, or all products?")
-        label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(self.popup_s, text="One", command=lambda: self.calender_select(0, 0))
-        b2 = ttk.Button(self.popup_s, text="All", command=lambda: self.calender_select(1, 0))
-        b1.pack()
-        b2.pack()
-        self.popup_s.mainloop()
+        if self.sel_barcode is None:
+            self.calender_select(1, 0)
+        else:
+            self.calender_select(0, 0)
 
     def prof_options(self):
-        self.popup_p = tk.Tk()
-        self.popup_p.wm_title("Profit Graph")
-        label = ttk.Label(self.popup_p, text="View graph for one product, or all products?")
-        label.pack(side="top", fill="x", pady=10)
-        b1 = ttk.Button(self.popup_p, text="One", command=lambda: self.calender_select(0, 1))
-        b2 = ttk.Button(self.popup_p, text="All", command=lambda: self.calender_select(1, 1))
-        b1.pack()
-        b2.pack()
-        self.popup_p.mainloop()
+        if self.sel_barcode is None:
+            self.calender_select(1, 1)
+        else:
+            self.calender_select(0, 1)
 
     def calender_select(self, typeA, typeB):
-        if typeB==0:
-            self.popup_s.destroy()
-        else:
-            self.popup_p.destroy()
         self.popup_c = tk.Tk()
         self.popup_c.wm_title("Select a starting point")
         calender = cal.Calendar(self.popup_c, selectmode='day',
-                       year=2020, month=5,
-                       day=22)
+                                year=2020, month=5,
+                                day=22)
 
         calender.pack(pady=20)
         label = ttk.Label(self.popup_c, text="Select a starting date for the graph.")
         label.pack(side="top", fill="x", pady=10)
-        if typeA==1:
-            b1 = ttk.Button(self.popup_c, text="Submit", command=lambda: self.show_graph(calender.get_date(),
-                                                                                         typeA, typeB, 0))
+        if typeA == 1:
+            b1 = ttk.Button(self.popup_c, text="Submit",
+                            command=lambda: self.show_graph(calender.get_date(), typeA, typeB, self.sel_barcode))
         else:
-            b1 = ttk.Button(self.popup_c, text="Submit", command=lambda: self.pick_code(calender.get_date(),
-                                                                                         typeA, typeB))
+            b1 = ttk.Button(self.popup_c, text="Submit",
+                            command=lambda: self.show_graph(calender.get_date(), typeA, typeB, self.sel_barcode))
         b1.pack()
         self.popup_c.mainloop()
 
-
-    def pick_code(self, day, typeA, typeB):
-        self.popup_c.destroy()
-        self.popup_b = tk.Tk()
-        self.popup_b.wm_title("Enter Name/Barcode")
-        label = ttk.Label(self.popup_b, text="Please enter barcode/name of item to view.")
-        label.pack(side="top", fill="x", pady=10)
-        e1 = ttk.Entry(self.popup_b)
-        b1 = ttk.Button(self.popup_b, text="Submit",
-                        command=lambda: self.code_submit(day, typeA, typeB, e1.get()))
-        b1.pack()
-        e1.pack()
-        self.popup_b.mainloop()
-
-    def code_submit(self, day, typeA, typeB, code):
-        if not NameBcode.find_one({"name": code}) and not NameBcode.find_one({"barcode": code}):
-            tk.messagebox.showerror('Input Error', 'Error: name/barcode not found!')
-            self.popup_b.destroy()
-        else:
-            name = NameBcode.find_one({"name": code})
-            if name:
-                code = name["barcode"]
-            self.show_graph(day, typeA, typeB, code)
-
     def show_graph(self, day, typeA, typeB, code):
-        if typeA==1:
-            self.popup_c.destroy()
-        else:
-            self.popup_b.destroy()
-        self.popup_g =tk.Tk()
+        self.popup_c.destroy()
+        self.popup_g = tk.Tk()
         start = datetime.strptime(day, "%m/%d/%y")
-        if typeB==0:
-            if typeA==0:
+        if typeB == 0:
+            if typeA == 0:
                 statsDict = Stats.find({"barcode": code})
                 times = []
                 quantities = []
@@ -854,7 +815,7 @@ class GraphMenu(tk.Tk):
                 plt.xlabel("Date/Time")
                 plt.grid()
                 plt.gcf().autofmt_xdate()
-                #plt.show()
+                # plt.show()
                 frame = tk.Frame(self.popup_g)
                 canvas = FigureCanvasTkAgg(fig,
                                            master=frame)
@@ -936,7 +897,7 @@ class GraphMenu(tk.Tk):
                     plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
                 plt.gcf().autofmt_xdate()
                 plt.grid()
-                #plt.show()
+                # plt.show()
                 frame = tk.Frame(self.popup_g)
                 canvas = FigureCanvasTkAgg(fig,
                                            master=frame)
@@ -949,7 +910,7 @@ class GraphMenu(tk.Tk):
                 bcodeDict = get_dat(NameBcode)
                 times = [start]
                 profits = [0]
-                profit_per={}
+                profit_per = {}
                 overall = 0.0
                 overall_per = 0.0
                 temp = 0
@@ -971,10 +932,10 @@ class GraphMenu(tk.Tk):
                             temp = i["quantity"]
                     profit_per[j["name"]] = overall_per
                     overall_per = 0.0
-                    temp=0
-                least=10000.0
+                    temp = 0
+                least = 10000.0
                 least_name = "NULL"
-                most=0.0
+                most = 0.0
                 most_name = "NULL"
                 for key, value in profit_per.items():
                     if value < least:
@@ -991,7 +952,7 @@ class GraphMenu(tk.Tk):
 
                 times, profits = zip(*sorted(zip(times, profits)))
                 fig, ax = plt.subplots()
-                #MAYBE ADD WATERFALL?
+                # MAYBE ADD WATERFALL?
                 for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
                     if y1 > y2:
                         ax.plot([x1, x2], [y1, y2], 'r')
@@ -1022,17 +983,18 @@ class GraphMenu(tk.Tk):
                 canvas.get_tk_widget().pack()
                 frame.pack()
 
-        b1 = ttk.Button(self.popup_g, text="Close", command=self.popup_g.destroy)
+        b1 = ttk.Button(self.popup_g, text="Return to Graph Selection", command=self.close_win)
         b1.pack(side="bottom")
 
-
     def close_win(self):
-        self.main_window.deiconify()
-        self.destroy()
+        if self.popup_g is not None:
+            self.popup_g.destroy()
+            self.popup_g = None
+        else:
+            self.main_window.deiconify()
+            self.destroy()
 
 
 if __name__ == '__main__':
     window = UI()
     window.mainloop()
-
-
