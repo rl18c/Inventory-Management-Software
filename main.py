@@ -5,7 +5,7 @@
 # Main DB (Inventory) stores data in the format name: string, barcode: string, quantity: int, price: float
 # Secondary DB (Stats) stores data in the form: barcode:string, time:datetime, quantity:int
 # Tertiary DB (NameBcode) stores data in the form: name:string, barcode:string
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import sys
 from tkinter import ttk
@@ -16,6 +16,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 import tkinter as tk
 from tkinter import *
 import tkcalendar as cal
+from collections import OrderedDict
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
@@ -776,9 +777,10 @@ class GraphMenu(tk.Tk):
     def calender_select(self, typeA, typeB):
         self.popup_c = tk.Tk()
         self.popup_c.wm_title("Select a starting point")
+        cal_day = datetime.now().date() - timedelta(days=7)
         calender = cal.Calendar(self.popup_c, selectmode='day',
-                                year=2020, month=5,
-                                day=22)
+                                year=cal_day.year, month=cal_day.month,
+                                day=cal_day.day)
 
         calender.pack(pady=20)
         label = ttk.Label(self.popup_c, text="Select a starting date for the graph.")
@@ -802,7 +804,7 @@ class GraphMenu(tk.Tk):
                 times = []
                 quantities = []
                 for i in statsDict:
-                    if i["time"] >= start and datetime.now:
+                    if start <= i["time"] <= datetime.now():
                         times.append(i["time"])
                         quantities.append(i["quantity"])
                 fig, ax = plt.subplots()
@@ -834,7 +836,7 @@ class GraphMenu(tk.Tk):
                 for j in bcodeDict:
                     statsDict = Stats.find({"barcode": j["barcode"]})
                     for i in statsDict:
-                        if i["time"] >= start and datetime.now:
+                        if start <= i["time"] <= datetime.now():
                             times.append(i["time"])
                             quantities.append(i["quantity"])
                     plt.plot(times, quantities, zorder=1, label=str(j["name"]))
@@ -861,12 +863,12 @@ class GraphMenu(tk.Tk):
         else:
             if typeA == 0:
                 statsDict = Stats.find({"barcode": code})
-                times = [start]
+                times = [start.date()]
                 profits = [0]
                 overall = 0.0
                 temp = 0
                 for i in statsDict:
-                    if i["time"] >= start and datetime.now:
+                    if start <= i["time"] <= datetime.now():
                         times.append(i["time"])
                         change = temp - i["quantity"]
                         if i["quantity"] < temp:
@@ -908,17 +910,18 @@ class GraphMenu(tk.Tk):
                 frame.pack()
             else:
                 bcodeDict = get_dat(NameBcode)
-                times = [start]
+                times = [start.date()]
                 profits = [0]
                 profit_per = {}
                 overall = 0.0
                 overall_per = 0.0
                 temp = 0
+                #Iterate through database and locate
                 for j in bcodeDict:
                     statsDict = Stats.find({"barcode": j["barcode"]})
                     for i in statsDict:
-                        if i["time"] >= start and datetime.now:
-                            times.append(i["time"])
+                        if start <= i["time"] <= datetime.now():
+                            times.append(i["time"].date())
                             change = temp - i["quantity"]
                             if i["quantity"] < temp:
                                 overall_per += float(change) * float(i["r_price"])
@@ -926,33 +929,44 @@ class GraphMenu(tk.Tk):
                                 profits.append(overall)
                             elif i["quantity"] > temp:
                                 overall_per += float(change) * float(i["w_price"])
-                                overall += float(change) * float(i["r_price"])
+                                overall += float(change) * float(i["w_price"])
                                 profits.append(overall)
 
                             temp = i["quantity"]
                     profit_per[j["name"]] = overall_per
                     overall_per = 0.0
                     temp = 0
-                least = 10000.0
-                least_name = "NULL"
-                most = 0.0
-                most_name = "NULL"
-                for key, value in profit_per.items():
-                    if value < least:
-                        least = value
-                        least_name = key
-                    if value > most:
-                        most = value
-                        most_name = key
 
-                label = ttk.Label(self.popup_g, text="Least Profitable Product: " + least_name + ": $" +
-                                                     "{:.2f}".format(least) + "\nMost Profitable Product: "
-                                                     + most_name + ": $" + "{:.2f}".format(most))
-                label.pack(side="bottom", fill="x", pady=10)
+                # print individual values
+                #sort dict
+                sorted_p = {k: v for k, v in sorted(profit_per.items(), key=lambda item: item[1])}
+                out = "Products ordered by value:\n"
+                i = 1
+                for key, value in sorted_p.items():
+                    out += "[" + str(i) + "] " + key + ": $" + "{:.2f}\n".format(value)
+                    i += 1
 
+                label = ttk.Label(self.popup_g, text=out)
+                label.pack(side="right", fill="x", pady=10)
+
+                #sort data by date
                 times, profits = zip(*sorted(zip(times, profits)))
+
+                # Iterative loop to combine profits for values on the same day
+                ordered = OrderedDict()
+                for thing1, thing2 in zip(times, profits):
+                    if ordered:
+                        if thing1 in ordered.keys():
+                            ordered[thing1] += thing2
+                        else:
+                            ordered[thing1] = thing2
+                    else:
+                        ordered[thing1] = thing2
+                times = list(ordered.keys())
+                profits = list(ordered.values())
+
                 fig, ax = plt.subplots()
-                # MAYBE ADD WATERFALL?
+                # Plotting profits
                 for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
                     if y1 > y2:
                         ax.plot([x1, x2], [y1, y2], 'r')
