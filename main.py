@@ -10,6 +10,7 @@ import random
 import sys
 from tkinter import ttk
 import pymongo
+import pandas
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
@@ -17,6 +18,7 @@ import tkinter as tk
 from tkinter import *
 import tkcalendar as cal
 from collections import OrderedDict
+import os
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
@@ -148,6 +150,9 @@ class UI(tk.Tk):
         # Add button border
         add_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        #Export button border
+        exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        exp_bord.grid(column=12, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Graph all button border
         g_all_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
@@ -195,6 +200,15 @@ class UI(tk.Tk):
                                command=self.inv_add)
         self.add_butt.grid()
         self.add_butt.config(width=18)
+
+        # Export Data Button
+        self.exp_butt = Button(exp_bord, text="Export Data",
+                               bg="white",
+                               borderwidth=0,
+                               font=("Helvetica", 11),
+                               command=self.inv_exp)
+        self.exp_butt.grid()
+        self.exp_butt.config(width=18)
 
         # Graph All button
         self.g_all_butt = Button(g_all_bord, text="Graph All",
@@ -495,6 +509,65 @@ class UI(tk.Tk):
         # This is where we must open new window to add Inventory DB
         addn = AddNew(self)
 
+    def inv_exp(self):
+        # Hides Original window while modifying
+        #self.withdraw()
+        # This is where we must open new window to add Inventory DB
+        #expd = ExportData(self)
+        directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
+        if directory:
+            filename = None
+            popup = tk.Tk()
+            popup.wm_title("Input name for file")
+            popup.eval('tk::PlaceWindow . center')
+            label = ttk.Label(popup, text="Input a name for your spreadsheet")
+            label.pack(side="top", fill="x", pady=10)
+            n_entry = Entry(popup, textvariable=filename)
+            n_entry.pack()
+            def get_in():
+                nonlocal filename
+                nonlocal directory
+                filename = n_entry.get()
+                if filename:
+                    popup.destroy()
+                path = directory +"/"+ filename + ".xlsx"
+                if os.path.exists(path):
+                    MsgBox = tk.messagebox.askquestion('File Exists',
+                                                       'File exists. Would you like to overwrite the file?',
+                                                       icon='warning')
+                    if MsgBox == 'yes':
+                        try:
+                            os.remove(path)
+                        except:
+                            tk.messagebox.showerror('Error', 'Error replacing file: File in use.')
+                            return
+                    else:
+                        return
+                d1 = pandas.DataFrame.from_dict(get_dat(Inventory))
+                d1 = d1.iloc[:, 1:]
+                d2 = pandas.DataFrame.from_dict(get_dat(Stats))
+                d2 = d2.iloc[:, 1:]
+                d2['time'] = d2['time'].astype(str)
+                d3 = pandas.DataFrame.from_dict(get_dat(NameBcode))
+                d3 = d3.iloc[:, 1:]
+                writer = pandas.ExcelWriter(path, engine='xlsxwriter')
+
+                d1.to_excel(writer, sheet_name='Inventory')
+                d2.to_excel(writer, sheet_name='Statistics')
+                d3.to_excel(writer, sheet_name='Unique Name Barcodes')
+                writer.save()
+                if os.path.exists(path):
+                    tk.messagebox.showinfo('Success!', 'File created successfully.')
+                else:
+                    tk.messagebox.showerror('Error', 'Error creating file.')
+
+
+
+            B1 = ttk.Button(popup, text="Submit", command=get_in)
+            B1.pack()
+
+
+
     def close_main(self):
         self.destroy()
 
@@ -540,6 +613,178 @@ class AddNew(tk.Tk):
         self.q_str = StringVar(self)
         self.rp_str = StringVar(self)
         self.wp_str = StringVar(self)
+
+        # Create frame to hold content of window
+        b_frame = Frame(self)
+        b_frame.grid(column=0, row=0, columnspan=5, rowspan=20, padx=25)
+        b_frame.configure(bg="#d0fbff")
+
+        # Title Label
+        t_lbl = Label(b_frame, text="New Item Form",
+                      font=("Helvetica", 16),
+                      borderwidth=2,
+                      relief="ridge",
+                      bg="#d0fbff")
+        t_lbl.grid(row=0, column=1, rowspan=2, columnspan=3, pady=15, sticky=W)
+
+        # Create 4 labels for entry boxes
+        n_lbl = Label(b_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        n_lbl.grid(row=2, column=0, sticky=E)
+        b_lbl = Label(b_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        b_lbl.grid(row=5, column=0, sticky=E)
+        q_lbl = Label(b_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        q_lbl.grid(row=8, column=0, sticky=E)
+        rp_lbl = Label(b_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        rp_lbl.grid(row=11, column=0, sticky=E)
+        wp_lbl = Label(b_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        wp_lbl.grid(row=14, column=0, sticky=E)
+
+        # Every time any entry text is changed,
+        # check if all entry boxes have content (If they do enable add button)
+        self.n_str.trace("w", self.ok_to_add)
+        self.b_str.trace("w", self.ok_to_add)
+        self.q_str.trace("w", self.ok_to_add)
+        self.rp_str.trace("w", self.ok_to_add)
+        self.wp_str.trace("w", self.ok_to_add)
+
+        # Creating 5 entry boxes (Name - Barcode - Quantity - Retail Price - Wholesale Price)
+        n_entry = Entry(b_frame, textvariable=self.n_str)
+        n_entry.grid(row=2, column=1, columnspan=4, pady=15)
+        b_entry = Entry(b_frame, textvariable=self.b_str)
+        b_entry.grid(row=5, column=1, columnspan=4, pady=15)
+        q_entry = Entry(b_frame, textvariable=self.q_str)
+        q_entry.grid(row=8, column=1, columnspan=4, pady=15)
+        rp_entry = Entry(b_frame, textvariable=self.rp_str)
+        rp_entry.grid(row=11, column=1, columnspan=4, pady=15)
+        wp_entry = Entry(b_frame, textvariable=self.wp_str)
+        wp_entry.grid(row=14, column=1, columnspan=4, pady=15)
+
+        # Add button border
+        add_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
+        add_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        # Go Back button border
+        back_border = Frame(b_frame, highlightthickness=2, highlightbackground="#d10000")
+        back_border.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+
+        # Add Item Button
+        self.a_butt = Button(add_border, text="Add Item",
+                             bg="white",
+                             borderwidth=0,
+                             state="disabled",
+                             font=("Helvetica", 11),
+                             command=self.db_add)
+        self.a_butt.grid()
+
+        # Go Back Button
+        back_butt = Button(back_border, text="Go Back", font=("Helvetica", 11),
+                           bg="white",
+                           borderwidth=0,
+                           command=self.close_win)
+        back_butt.grid()
+
+        self.lift()
+
+    def submit_clicked(self):
+        n = self.n_str.get()
+        b = self.b_str.get()
+        q = int(self.q_str.get())
+        rp = float(self.rp_str.get())
+        wp = float(self.wp_str.get())
+        x = Inventory.find_one({"name": n})
+        if x:
+            nameF = tk.messagebox.askquestion \
+                ('Name Found', 'Entry with name ' + n + ' found. Update it?')
+            if nameF:
+                Inventory.update_one({"name": n}, {"$set": {"name": n, "barcode": b,
+                                                            "quantity": q,
+                                                            "r_price": rp, "w_price": wp}})
+        y = Inventory.find_one({"barcode": b})
+        if y and not x:
+            nameB = tk.messagebox.askquestion \
+                ('Barcode Found', 'Entry with barcode ' + b + ' found. Update it?')
+            if nameB:
+                Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b,
+                                                               "quantity": q,
+                                                               "r_price": rp, "w_price": wp}})
+        z = NameBcode.find_one({"barcode": b})
+        if not z:
+            nameBU = tk.messagebox.askquestion \
+                ('Unique Barcode Found', 'Unique barcode found. Update unique database?')
+            if nameBU:
+                NameBcode.insert_one({"name": n, "barcode": b})
+        else:
+            if z["name"] != n:
+                nameBA = tk.messagebox.askquestion \
+                    ('Unique Barcode Already Used',
+                     'Unique barcode already used. Update unique and statistics database?')
+                if nameBA:
+                    NameBcode.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b}})
+                    Stats.delete_many({"barcode": b})
+                    Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b, "quantity": q,
+                                                                   "r_price": rp, "w_price": wp}})
+        if not x and not y:
+            Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+
+        Stats.insert_one({"time": datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+
+        tk.messagebox.showinfo(
+            title='Success',
+            message="Value Successfully inserted!"
+        )
+        self.n_str.set("")
+        self.b_str.set("")
+        self.q_str.set("")
+        self.rp_str.set("")
+        self.wp_str.set("")
+
+    # Callback function for add item button
+    def db_add(self):
+        # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
+        if not self.b_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Barcode", message="Barcode must be comprised of only integers.")
+            return
+        if not self.q_str.get().isdigit():
+            tk.messagebox.showerror(title="Invalid Quantity", message="Quantity must be a whole integer.")
+            return
+        try:
+            float(self.rp_str.get())
+            float(self.wp_str.get())
+            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) > 2:
+                raise ValueError
+            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) < 2:
+                raise ValueError
+            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) > 2:
+                raise ValueError
+            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) < 2:
+                raise ValueError
+        except ValueError:
+            tk.messagebox.showerror(title="Invalid Price",
+                                    message="Price (Retail and Wholesale) must be a "
+                                            "floating point number which "
+                                            "does not extend beyond the "
+                                            "hundredth place.")
+            return
+        # Here we have a valid item to get added
+        self.submit_clicked()
+
+    # Callback function for add item button
+    def ok_to_add(self, var, index, mode):
+        if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.rp_str.get() and self.wp_str.get():
+            self.a_butt.config(state="normal")
+        else:
+            self.a_butt.config(state="disabled")
+
+    def close_win(self):
+        self.main_window.deiconify()
+        self.destroy()
+
+class ExportData(tk.Tk):
+    def __init__(self, mas):
+        super().__init__()
+        self.main_window = mas
+        self.configure(bg="#d0fbff")
+        self.title("Export Data")
+        self.resizable(False, False)
 
         # Create frame to hold content of window
         b_frame = Frame(self)
@@ -948,15 +1193,37 @@ class GraphMenu(tk.Tk):
                               relief="groove",
                               borderwidth=3,
                               highlightcolor="#a8329e")
-                title.grid(column=8, row=2, columnspan=2, sticky=EW)
+                title.grid(column=15, row=2, columnspan=2, sticky=EW)
                 lbl_list = []
                 i = 1
+
+                tree_prof_frame = Frame(self.popup_g, highlightthickness=2, highlightbackground="#37d3ff")
+                tree_prof = ttk.Treeview(tree_prof_frame, columns=["Name", "Profit"], show="headings",
+                                         height=sorted_p.__sizeof__())
+                # Define each column's width
+                tree_prof.column("Name", anchor=CENTER, width=80)
+                tree_prof.column("Profit", anchor=CENTER, width=80)
+
+                # Define heading's text
+                tree_prof.heading("Name", text="Name")
+                tree_prof.heading("Profit", text="Profit")
+                tree_prof.grid(row=3, column=15, columnspan=2, sticky=EW)
+
                 for key, value in sorted_p.items():
-                    t = "[" + str(i) + "] " + key + ": $" + "{:.2f}".format(value)
-                    t_item = Label(self.popup_g, text=t, font=("Helvetica", 10), bg="#d0fbff")
-                    t_item.grid(column=8, row=2 + i, columnspan=2, sticky=W)
+                    l = (key, value)
+                    tree_prof.insert("", END, values=l)
+
+                scroll_prof = Scrollbar(tree_prof_frame, orient="vertical", command=tree_prof.yview)
+                scroll_prof.grid(row=3, column=16, rowspan=sorted_p.__sizeof__(), sticky="nse")
+                tree_prof.config(yscrollcommand=scroll_prof.set)
+
+
+                # for key, value in sorted_p.items():
+                    # t = "[" + str(i) + "] " + key + ": $" + "{:.2f}".format(value)
+                    # t_item = Label(self.popup_g, text=t, font=("Helvetica", 10), bg="#d0fbff")
+                    # t_item.grid(column=8, row=2 + i, columnspan=2, sticky=W)
                     # out += "[" + str(i) + "] " + key + ": $" + "{:.2f}\n".format(value)
-                    i += 1
+                    # i += 1
 
                 # label = ttk.Label(self.popup_g, text=out)
                 # label.pack(side="right", fill="x", pady=10)
