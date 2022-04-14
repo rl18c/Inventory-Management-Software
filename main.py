@@ -20,6 +20,7 @@ from collections import OrderedDict
 
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
+
 db = client["InvManager"]
 Inventory = db["Inventory"]
 Stats = db["StatsTime"]  # Used in determining stats over time for the inventory
@@ -130,8 +131,8 @@ class UI(tk.Tk):
         self.disable_entries()
 
         col, row = self.grid_size()
-        #for c in range(col):
-            #self.grid_columnconfigure(c, minsize=30)
+        # for c in range(col):
+        # self.grid_columnconfigure(c, minsize=30)
 
     def init_buttons(self):
         # Define 7 borders for each button
@@ -797,6 +798,7 @@ class GraphMenu(tk.Tk):
     def show_graph(self, day, typeA, typeB, code):
         self.popup_c.destroy()
         self.popup_g = tk.Tk()
+        self.popup_g.configure(bg="#d0fbff")
         start = datetime.strptime(day, "%m/%d/%y")
         if typeB == 0:
             if typeA == 0:
@@ -825,7 +827,7 @@ class GraphMenu(tk.Tk):
                 NavigationToolbar2Tk(canvas, frame)
                 # placing the canvas on the Tkinter window
                 canvas.get_tk_widget().pack()
-                frame.pack()
+                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
 
             else:
                 bcodeDict = get_dat(NameBcode)
@@ -859,7 +861,7 @@ class GraphMenu(tk.Tk):
                 NavigationToolbar2Tk(canvas, frame)
                 # placing the canvas on the Tkinter window
                 canvas.get_tk_widget().pack()
-                frame.pack()
+                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
         else:
             if typeA == 0:
                 statsDict = Stats.find({"barcode": code})
@@ -907,7 +909,7 @@ class GraphMenu(tk.Tk):
                 NavigationToolbar2Tk(canvas, frame)
                 # placing the canvas on the Tkinter window
                 canvas.get_tk_widget().pack()
-                frame.pack()
+                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
             else:
                 bcodeDict = get_dat(NameBcode)
                 times = [start.date()]
@@ -916,7 +918,7 @@ class GraphMenu(tk.Tk):
                 overall = 0.0
                 overall_per = 0.0
                 temp = 0
-                #Iterate through database and locate
+                # Iterate through database and locate
                 for j in bcodeDict:
                     statsDict = Stats.find({"barcode": j["barcode"]})
                     for i in statsDict:
@@ -938,18 +940,28 @@ class GraphMenu(tk.Tk):
                     temp = 0
 
                 # print individual values
-                #sort dict
+                # sort dict
                 sorted_p = {k: v for k, v in sorted(profit_per.items(), key=lambda item: item[1])}
-                out = "Products ordered by value:\n"
+                out = "Products ordered by value:"
+                title = Label(self.popup_g, text=out, font=("Helvetica", 11),
+                              bg="#d0fbff",
+                              relief="groove",
+                              borderwidth=3,
+                              highlightcolor="#a8329e")
+                title.grid(column=8, row=2, columnspan=2, sticky=EW)
+                lbl_list = []
                 i = 1
                 for key, value in sorted_p.items():
-                    out += "[" + str(i) + "] " + key + ": $" + "{:.2f}\n".format(value)
+                    t = "[" + str(i) + "] " + key + ": $" + "{:.2f}".format(value)
+                    t_item = Label(self.popup_g, text=t, font=("Helvetica", 10), bg="#d0fbff")
+                    t_item.grid(column=8, row=2 + i, columnspan=2, sticky=W)
+                    # out += "[" + str(i) + "] " + key + ": $" + "{:.2f}\n".format(value)
                     i += 1
 
-                label = ttk.Label(self.popup_g, text=out)
-                label.pack(side="right", fill="x", pady=10)
+                # label = ttk.Label(self.popup_g, text=out)
+                # label.pack(side="right", fill="x", pady=10)
 
-                #sort data by date
+                # sort data by date
                 times, profits = zip(*sorted(zip(times, profits)))
 
                 # Iterative loop to combine profits for values on the same day
@@ -995,10 +1007,15 @@ class GraphMenu(tk.Tk):
                 NavigationToolbar2Tk(canvas, frame)
                 # placing the canvas on the Tkinter window
                 canvas.get_tk_widget().pack()
-                frame.pack()
-
-        b1 = ttk.Button(self.popup_g, text="Return to Graph Selection", command=self.close_win)
-        b1.pack(side="bottom")
+                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
+        # Close button border
+        close_bord = Frame(self.popup_g, highlightthickness=2, highlightbackground="#d10000")
+        close_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=EW, padx=25, pady=12)
+        b1 = Button(close_bord, text="Return to Graph Selection", command=self.close_win,
+                    bg="white",
+                    font=("Helvetica", 10),
+                    borderwidth=0)
+        b1.grid()
 
     def close_win(self):
         if self.popup_g is not None:
