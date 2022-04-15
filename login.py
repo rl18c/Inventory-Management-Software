@@ -314,38 +314,3 @@ class loginMessage(tk.Tk):
 if __name__ == '__main__':
     window = UI()
     window.mainloop()
-
-
-
-"""
-while True:
-    menu()
-    option = input()
-    if(int(option) == 1):
-        user = input()
-        password = input()
-        if login.find_one({"name" : user, "password" : password}):
-            #grab correct inv
-            print("succ")
-        else:
-            print("notfound")
-    elif(int(option) == 2):
-        user = input()
-        password = input()
-        if login.find_one({"name" : user, "password" : password}):
-            print("exists")
-        else:
-            login.insert_one({"name" : user, "password" : password})
-            loguser = db[user]
-            loguser.insert_one({"price" : 69})
-            print(db.list_collection_names())
-    elif(int(option) == 3):
-        user = input()
-        password = input()
-        if login.find_one({"name" : user, "password" : password}):
-            login.delete_one({"name" : user, "password" : password})
-        else:
-            print("not found")
-    else:
-        break
-"""
