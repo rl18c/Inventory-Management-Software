@@ -79,7 +79,6 @@ def barcode():
         message=output
     )
 
-
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -152,10 +151,10 @@ class UI(tk.Tk):
         add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         #Export button border
         exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        exp_bord.grid(column=12, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        exp_bord.grid(column=11, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Import button border
         imp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        imp_bord.grid(column=12, row=17, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        imp_bord.grid(column=11, row=14, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Graph all button border
         g_all_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
@@ -759,10 +758,9 @@ class UI(tk.Tk):
                 print("cancel")
                 return
 
-
-
     def close_main(self):
         self.destroy()
+        exit()
 
 
 # Testing Data
@@ -1030,12 +1028,14 @@ class GraphMenu(tk.Tk):
         self.lift()
 
     def stock_options(self):
+        self.withdraw()
         if self.sel_barcode is None:
             self.calender_select(1, 0)
         else:
             self.calender_select(0, 0)
 
     def prof_options(self):
+        self.withdraw()
         if self.sel_barcode is None:
             self.calender_select(1, 1)
         else:
@@ -1078,7 +1078,7 @@ class GraphMenu(tk.Tk):
                 fig, ax = plt.subplots()
                 ax.plot(times, quantities, zorder=1)
                 ax.scatter(times, quantities, zorder=2, color='black')
-                item = NameBcode.find_one({"barcode": code})
+                item = NameBcode.find_one({"barcode": float(code)})
                 self.popup_g.title('Inventory of ' + item["name"])
                 plt.title("Inventory of " + item["name"] + " Over Time")
                 plt.ylabel("Quantity")
@@ -1156,8 +1156,7 @@ class GraphMenu(tk.Tk):
                     else:
                         ax.plot([x1, x2], [y1, y2], 'b')
                 ax.scatter(times, profits, zorder=2, color='black')
-                item = NameBcode.find_one({"barcode": code})
-
+                item = NameBcode.find_one({"barcode": float(code)})
                 plt.suptitle("Profits of " + item["name"] + " Over Time")
                 plt.ylabel("Profit")
                 plt.xlabel("Date/Time")
@@ -1294,263 +1293,21 @@ class GraphMenu(tk.Tk):
         # Close button border
         close_bord = Frame(self.popup_g, highlightthickness=2, highlightbackground="#d10000")
         close_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=EW, padx=25, pady=12)
-        b1 = Button(close_bord, text="Return to Graph Selection", command=self.close_win,
+        b1 = Button(close_bord, text="Return to Graph Selection",
+                    command=self.close_graph,
                     bg="white",
                     font=("Helvetica", 10),
                     borderwidth=0)
         b1.grid()
-
-    def show_graph(self, day, typeA, typeB, code):
-        self.popup_c.destroy()
-        self.popup_g = tk.Tk()
-        self.popup_g.configure(bg="#d0fbff")
-        start = datetime.strptime(day, "%m/%d/%y")
-        if typeB == 0:
-            if typeA == 0:
-                statsDict = Stats.find({"barcode": code})
-                times = []
-                quantities = []
-                for i in statsDict:
-                    if start <= i["time"] <= datetime.now():
-                        times.append(i["time"])
-                        quantities.append(i["quantity"])
-                fig, ax = plt.subplots()
-                ax.plot(times, quantities, zorder=1)
-                ax.scatter(times, quantities, zorder=2, color='black')
-                item = NameBcode.find_one({"barcode": code})
-                self.popup_g.title('Inventory of ' + item["name"])
-                plt.title("Inventory of " + item["name"] + " Over Time")
-                plt.ylabel("Quantity")
-                plt.xlabel("Date/Time")
-                plt.grid()
-                plt.gcf().autofmt_xdate()
-                # plt.show()
-                frame = tk.Frame(self.popup_g)
-                canvas = FigureCanvasTkAgg(fig,
-                                           master=frame)
-                canvas.draw()
-                NavigationToolbar2Tk(canvas, frame)
-                # placing the canvas on the Tkinter window
-                canvas.get_tk_widget().pack()
-                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
-
-            else:
-                bcodeDict = get_dat(NameBcode)
-                times = []
-                quantities = []
-
-                fig, ax = plt.subplots()
-                for j in bcodeDict:
-                    statsDict = Stats.find({"barcode": j["barcode"]})
-                    for i in statsDict:
-                        if start <= i["time"] <= datetime.now():
-                            times.append(i["time"])
-                            quantities.append(i["quantity"])
-                    plt.plot(times, quantities, zorder=1, label=str(j["name"]))
-                    plt.scatter(times, quantities, zorder=2, color='black')
-                    times.clear()
-                    quantities.clear()
-
-                self.popup_g.title('Inventory Overall')
-                plt.title("Inventory Over Time")
-                plt.ylabel("Quantity")
-                plt.xlabel("Date/Time")
-                plt.grid()
-                plt.legend(loc='best')
-                plt.gcf().autofmt_xdate()
-                # plt.show()
-                frame = tk.Frame(self.popup_g)
-                canvas = FigureCanvasTkAgg(fig,
-                                           master=frame)
-                canvas.draw()
-                NavigationToolbar2Tk(canvas, frame)
-                # placing the canvas on the Tkinter window
-                canvas.get_tk_widget().pack()
-                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
-        else:
-            if typeA == 0:
-                statsDict = Stats.find({"barcode": code})
-                times = [start.date()]
-                profits = [0]
-                overall = 0.0
-                temp = 0
-                for i in statsDict:
-                    if start <= i["time"] <= datetime.now():
-                        times.append(i["time"])
-                        change = temp - i["quantity"]
-                        if i["quantity"] < temp:
-                            overall += float(change) * float(i["r_price"])
-                            profits.append(overall)
-                        elif i["quantity"] > temp:
-                            overall += float(change) * float(i["w_price"])
-                            profits.append(overall)
-
-                        temp = i["quantity"]
-                fig, ax = plt.subplots()
-                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
-                    if y1 > y2:
-                        ax.plot([x1, x2], [y1, y2], 'r')
-                    elif y1 < y2:
-                        ax.plot([x1, x2], [y1, y2], 'g')
-                    else:
-                        ax.plot([x1, x2], [y1, y2], 'b')
-                ax.scatter(times, profits, zorder=2, color='black')
-                item = NameBcode.find_one({"barcode": code})
-
-                plt.suptitle("Profits of " + item["name"] + " Over Time")
-                plt.ylabel("Profit")
-                plt.xlabel("Date/Time")
-                if overall >= 0:
-                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
-                else:
-                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
-                plt.gcf().autofmt_xdate()
-                plt.grid()
-                # plt.show()
-                frame = tk.Frame(self.popup_g)
-                canvas = FigureCanvasTkAgg(fig,
-                                           master=frame)
-                canvas.draw()
-                NavigationToolbar2Tk(canvas, frame)
-                # placing the canvas on the Tkinter window
-                canvas.get_tk_widget().pack()
-                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
-            else:
-                bcodeDict = get_dat(NameBcode)
-                times = [start.date()]
-                profits = [0]
-                profit_per = {}
-                overall = 0.0
-                overall_per = 0.0
-                temp = 0
-                # Iterate through database and locate
-                for j in bcodeDict:
-                    statsDict = Stats.find({"barcode": j["barcode"]})
-                    for i in statsDict:
-                        if start <= i["time"] <= datetime.now():
-                            times.append(i["time"].date())
-                            change = temp - i["quantity"]
-                            if i["quantity"] < temp:
-                                overall_per += float(change) * float(i["r_price"])
-                                overall += float(change) * float(i["r_price"])
-                                profits.append(overall)
-                            elif i["quantity"] > temp:
-                                overall_per += float(change) * float(i["w_price"])
-                                overall += float(change) * float(i["w_price"])
-                                profits.append(overall)
-
-                            temp = i["quantity"]
-                    profit_per[j["name"]] = overall_per
-                    overall_per = 0.0
-                    temp = 0
-
-                # print individual values
-                # sort dict
-                sorted_p = {k: v for k, v in sorted(profit_per.items(), key=lambda item: item[1])}
-                out = "Products ordered by value:"
-                title = Label(self.popup_g, text=out, font=("Helvetica", 11),
-                              bg="#d0fbff",
-                              relief="groove",
-                              borderwidth=3,
-                              highlightcolor="#a8329e")
-                title.grid(column=15, row=2, columnspan=2, sticky=EW)
-                lbl_list = []
-                i = 1
-
-                tree_prof_frame = Frame(self.popup_g, highlightthickness=2, highlightbackground="#37d3ff")
-                tree_prof = ttk.Treeview(tree_prof_frame, columns=["Name", "Profit"], show="headings",
-                                         height=sorted_p.__sizeof__())
-                # Define each column's width
-                tree_prof.column("Name", anchor=CENTER, width=80)
-                tree_prof.column("Profit", anchor=CENTER, width=80)
-
-                # Define heading's text
-                tree_prof.heading("Name", text="Name")
-                tree_prof.heading("Profit", text="Profit")
-                tree_prof.grid(row=3, column=15, columnspan=2, sticky=EW)
-
-                for key, value in sorted_p.items():
-                    l = (key, value)
-                    tree_prof.insert("", END, values=l)
-
-                scroll_prof = Scrollbar(tree_prof_frame, orient="vertical", command=tree_prof.yview)
-                scroll_prof.grid(row=3, column=16, rowspan=sorted_p.__sizeof__(), sticky="nse")
-                tree_prof.config(yscrollcommand=scroll_prof.set)
-
-
-                # for key, value in sorted_p.items():
-                    # t = "[" + str(i) + "] " + key + ": $" + "{:.2f}".format(value)
-                    # t_item = Label(self.popup_g, text=t, font=("Helvetica", 10), bg="#d0fbff")
-                    # t_item.grid(column=8, row=2 + i, columnspan=2, sticky=W)
-                    # out += "[" + str(i) + "] " + key + ": $" + "{:.2f}\n".format(value)
-                    # i += 1
-
-                # label = ttk.Label(self.popup_g, text=out)
-                # label.pack(side="right", fill="x", pady=10)
-
-                # sort data by date
-                times, profits = zip(*sorted(zip(times, profits)))
-
-                # Iterative loop to combine profits for values on the same day
-                ordered = OrderedDict()
-                for thing1, thing2 in zip(times, profits):
-                    if ordered:
-                        if thing1 in ordered.keys():
-                            ordered[thing1] += thing2
-                        else:
-                            ordered[thing1] = thing2
-                    else:
-                        ordered[thing1] = thing2
-                times = list(ordered.keys())
-                profits = list(ordered.values())
-
-                fig, ax = plt.subplots()
-                # Plotting profits
-                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
-                    if y1 > y2:
-                        ax.plot([x1, x2], [y1, y2], 'r')
-                    elif y1 < y2:
-                        ax.plot([x1, x2], [y1, y2], 'g')
-                    else:
-                        ax.plot([x1, x2], [y1, y2], 'b')
-                ax.scatter(times, profits, zorder=2, color='black')
-
-                plt.suptitle("Overall Profits Over Time")
-                plt.ylabel("Profit")
-                plt.xlabel("Date/Time")
-                if overall >= 0:
-                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
-                else:
-                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
-                plt.gcf().autofmt_xdate()
-                plt.grid()
-                # plt.show()
-                plt.gcf().autofmt_xdate()
-                # plt.show()
-                frame = tk.Frame(self.popup_g)
-                canvas = FigureCanvasTkAgg(fig,
-                                           master=frame)
-                canvas.draw()
-                NavigationToolbar2Tk(canvas, frame)
-                # placing the canvas on the Tkinter window
-                canvas.get_tk_widget().pack()
-                frame.grid(column=1, row=2, columnspan=6, rowspan=17)
-        # Close button border
-        close_bord = Frame(self.popup_g, highlightthickness=2, highlightbackground="#d10000")
-        close_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=EW, padx=25, pady=12)
-        b1 = Button(close_bord, text="Return to Graph Selection", command=self.close_win,
-                    bg="white",
-                    font=("Helvetica", 10),
-                    borderwidth=0)
-        b1.grid()
+        self.popup_g.mainloop()
 
     def close_win(self):
-        if self.popup_g is not None:
-            self.popup_g.destroy()
-            self.popup_g = None
-        else:
-            self.main_window.deiconify()
-            self.destroy()
+        self.main_window.deiconify()
+        self.destroy()
+
+    def close_graph(self):
+        self.deiconify()
+        self.popup_g.destroy()
 
 
 if __name__ == '__main__':
