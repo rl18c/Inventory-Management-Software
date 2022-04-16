@@ -153,6 +153,9 @@ class UI(tk.Tk):
         #Export button border
         exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         exp_bord.grid(column=12, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        # Import button border
+        imp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        imp_bord.grid(column=12, row=17, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Graph all button border
         g_all_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
@@ -209,6 +212,15 @@ class UI(tk.Tk):
                                command=self.inv_exp)
         self.exp_butt.grid()
         self.exp_butt.config(width=18)
+
+        # Import Data Button
+        self.imp_butt = Button(imp_bord, text="Import Data",
+                               bg="white",
+                               borderwidth=0,
+                               font=("Helvetica", 11),
+                               command=self.inv_imp)
+        self.imp_butt.grid()
+        self.imp_butt.config(width=18)
 
         # Graph All button
         self.g_all_butt = Button(g_all_bord, text="Graph All",
@@ -565,6 +577,187 @@ class UI(tk.Tk):
 
             B1 = ttk.Button(popup, text="Submit", command=get_in)
             B1.pack()
+
+    def inv_imp(self):
+        # Hides Original window while modifying
+        # self.withdraw()
+        # This is where we must open new window to add Inventory DB
+        # expd = ExportData(self)
+        file = tk.filedialog.askopenfilename(initialdir="/", title='Please select a file for Import')
+        if file == "":
+            return
+        try:
+            xls = pandas.ExcelFile(file)
+        except:
+            tk.messagebox.showerror('Error', 'Error opening file: Not an excel file.')
+            return
+        d1 = xls.parse(xls.sheet_names[0])  # Inventory
+        d2 = xls.parse(xls.sheet_names[1])  # Stats
+        d3 = xls.parse(xls.sheet_names[2])  # NameBcode
+        # except:
+        #   tk.messagebox.showerror('Error', 'Error opening file.')
+        #  return
+        if file:
+            result = tk.messagebox.askyesnocancel("Data Replacement",
+                                                  "Would you like to replace the database? (select no for append)\n"
+                                                  "(Note: Make sure the file is formatted like the export file)")
+            # Above is temporary until i can make my own message box
+            if result is True:
+                d1 = d1.reset_index()
+                d2 = d2.reset_index()
+                d3 = d3.reset_index()
+                for index, row in d1.iterrows():
+                    try:
+                        n = row["name"]
+                        b = row["barcode"]
+                        q = row["quantity"]
+                        r = row["r_price"]
+                        w = row["w_price"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Inventory sheet formatted improperly.')
+                        return
+                for index, row in d2.iterrows():
+                    try:
+                        t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                        b = row["barcode"]
+                        q = row["quantity"]
+                        r = row["r_price"]
+                        w = row["w_price"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Statistics sheet formatted improperly.')
+                        return
+                for index, row in d3.iterrows():
+                    try:
+                        n = row["name"]
+                        b = row["barcode"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        return
+
+                Inventory.delete_many({})
+                Stats.delete_many({})
+                NameBcode.delete_many({})
+                d1 = d1.reset_index()
+                d2 = d2.reset_index()
+                d3 = d3.reset_index()
+                for index, row in d1.iterrows():
+                    try:
+                        Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
+                                              "quantity": row["quantity"], "r_price": row["r_price"],
+                                              "w_price": row["w_price"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Inventory sheet formatted improperly.')
+                        return
+                for index, row in d2.iterrows():
+                    dt_obj = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                    try:
+                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": row["quantity"],
+                                          "r_price": row["r_price"], "w_price": row["w_price"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Statistics sheet formatted improperly.')
+                        return
+                for index, row in d3.iterrows():
+                    try:
+                        NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        return
+                tk.messagebox.showinfo('Success!', 'Database written successfully.')
+
+
+            elif result is False:
+                d1 = d1.reset_index()
+                d2 = d2.reset_index()
+                d3 = d3.reset_index()
+                for index, row in d1.iterrows():
+                    try:
+                        n = row["name"]
+                        b = row["barcode"]
+                        q = row["quantity"]
+                        r = row["r_price"]
+                        w = row["w_price"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Inventory sheet formatted improperly.')
+                        return
+                for index, row in d2.iterrows():
+                    try:
+                        t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                        b = row["barcode"]
+                        q = row["quantity"]
+                        r = row["r_price"]
+                        w = row["w_price"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Statistics sheet formatted improperly.')
+                        return
+                for index, row in d3.iterrows():
+                    try:
+                        n = row["name"]
+                        b = row["barcode"]
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        return
+                d1 = d1.reset_index()
+                d2 = d2.reset_index()
+                d3 = d3.reset_index()
+                for index, row in d3:
+                    name = NameBcode.find_one({"name": row["name"]})
+                    code = NameBcode.find_one({"barcode": row["barcode"]})
+                    if name or code:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Unique barcode' + row["name"] + ': '
+                                                + row["barcode"] + ' already used.')
+                        return
+
+                for index, row in d2.iterrows():
+                    try:
+                        dt_obj = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: Times formatted improperly.')
+                        return
+                    try:
+                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": row["quantity"],
+                                          "r_price": row["r_price"], "w_price": row["w_price"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Statistics sheet formatted improperly.')
+                        return
+                for index, row in d3.iterrows():
+                    try:
+                        NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        return
+                for index, row in d1.iterrows():
+                    try:
+                        Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
+                                              "quantity": row["quantity"], "r_price": row["r_price"],
+                                              "w_price": row["w_price"]})
+                        if not Stats.find_one({"barcode": row["barcode"]}):
+                            Stats.insert_one({"time": datetime.now(), "barcode": row["barcode"],
+                                              "quantity": row["quantity"], "r_price": row["r_price"],
+                                              "w_price": row["w_price"]})
+                        if not NameBcode.find_one(row["barcode"]) or not NameBcode.find_one(row["name"]):
+                            NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                    except:
+                        tk.messagebox.showerror('Error', 'Error converting file: '
+                                                         'Inventory sheet formatted improperly.')
+                        return
+
+                tk.messagebox.showinfo('Success!', 'Database written successfully.')
+
+            elif result is None:
+                print("cancel")
+                return
 
 
 
