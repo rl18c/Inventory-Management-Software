@@ -152,6 +152,10 @@ class UI(tk.Tk):
         #Export button border
         exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         exp_bord.grid(column=11, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+
+        # Export Template button border
+        expt_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        expt_bord.grid(column=11, row=17, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Import button border
         imp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         imp_bord.grid(column=11, row=14, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
@@ -211,6 +215,15 @@ class UI(tk.Tk):
                                command=self.inv_exp)
         self.exp_butt.grid()
         self.exp_butt.config(width=18)
+
+        # Export Template Data Button
+        self.expt_butt = Button(expt_bord, text="Create Import Template",
+                               bg="white",
+                               borderwidth=0,
+                               font=("Helvetica", 11),
+                               command=self.inv_expt)
+        self.expt_butt.grid()
+        self.expt_butt.config(width=18)
 
         # Import Data Button
         self.imp_butt = Button(imp_bord, text="Import Data",
@@ -577,6 +590,51 @@ class UI(tk.Tk):
             B1 = ttk.Button(popup, text="Submit", command=get_in)
             B1.pack()
 
+    def inv_expt(self):
+        # Hides Original window while modifying
+        #self.withdraw()
+        # This is where we must open new window to add Inventory DB
+        #expd = ExportData(self)
+        directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
+        if directory:
+            path = directory +"/template.xlsx"
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except:
+                    tk.messagebox.showerror('Error', 'Error remaking file: template.xlsx in use.')
+                    return
+                inv_data= [['NAME', '0000', 0, "0.00", "0.00"]]
+                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00", "0.00"]]
+                nbc_data = [['NAME', '0000']]
+                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d3 = pandas.DataFrame(nbc_data, columns=['name', 'barcode'])
+                writer = pandas.ExcelWriter(path, engine='xlsxwriter')
+
+                d1.to_excel(writer, sheet_name='Inventory')
+                d2.to_excel(writer, sheet_name='Statistics')
+                d3.to_excel(writer, sheet_name='Unique Name Barcodes')
+                writer.save()
+            else:
+                inv_data = [['NAME', '0000', 0, "0.00", "0.00"]]
+                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00", "0.00"]]
+                nbc_data = [['NAME', '0000']]
+                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d3 = pandas.DataFrame(nbc_data, columns=['name', 'barcode'])
+                writer = pandas.ExcelWriter(path, engine='xlsxwriter')
+
+                d1.to_excel(writer, sheet_name='Inventory')
+                d2.to_excel(writer, sheet_name='Statistics')
+                d3.to_excel(writer, sheet_name='Unique Name Barcodes')
+                writer.save()
+            if os.path.exists(path):
+                tk.messagebox.showinfo('Success!', 'File created successfully.')
+            else:
+                tk.messagebox.showerror('Error', 'Error creating file.')
+
+
     def inv_imp(self):
         # Hides Original window while modifying
         # self.withdraw()
@@ -609,9 +667,9 @@ class UI(tk.Tk):
                     try:
                         n = row["name"]
                         b = row["barcode"]
-                        q = row["quantity"]
-                        r = row["r_price"]
-                        w = row["w_price"]
+                        q = int(row["quantity"])
+                        r = float(row["r_price"])
+                        w = float(row["w_price"])
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Inventory sheet formatted improperly.')
@@ -620,9 +678,9 @@ class UI(tk.Tk):
                     try:
                         t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
                         b = row["barcode"]
-                        q = row["quantity"]
-                        r = row["r_price"]
-                        w = row["w_price"]
+                        q = int(row["quantity"])
+                        r = float(row["r_price"])
+                        w = float(row["w_price"])
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Statistics sheet formatted improperly.')
@@ -645,8 +703,8 @@ class UI(tk.Tk):
                 for index, row in d1.iterrows():
                     try:
                         Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
-                                              "quantity": row["quantity"], "r_price": row["r_price"],
-                                              "w_price": row["w_price"]})
+                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
+                                              "w_price": float(row["w_price"])})
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Inventory sheet formatted improperly.')
@@ -654,8 +712,8 @@ class UI(tk.Tk):
                 for index, row in d2.iterrows():
                     dt_obj = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
                     try:
-                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": row["quantity"],
-                                          "r_price": row["r_price"], "w_price": row["w_price"]})
+                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": int(row["quantity"]),
+                                          "r_price": float(row["r_price"]), "w_price": float(row["w_price"])})
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Statistics sheet formatted improperly.')
@@ -678,9 +736,9 @@ class UI(tk.Tk):
                     try:
                         n = row["name"]
                         b = row["barcode"]
-                        q = row["quantity"]
-                        r = row["r_price"]
-                        w = row["w_price"]
+                        q = int(row["quantity"])
+                        r = float(row["r_price"])
+                        w = float(row["w_price"])
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Inventory sheet formatted improperly.')
@@ -689,9 +747,9 @@ class UI(tk.Tk):
                     try:
                         t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
                         b = row["barcode"]
-                        q = row["quantity"]
-                        r = row["r_price"]
-                        w = row["w_price"]
+                        q = int(row["quantity"])
+                        r = float(row["r_price"])
+                        w = float(row["w_price"])
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Statistics sheet formatted improperly.')
@@ -723,8 +781,8 @@ class UI(tk.Tk):
                         tk.messagebox.showerror('Error', 'Error converting file: Times formatted improperly.')
                         return
                     try:
-                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": row["quantity"],
-                                          "r_price": row["r_price"], "w_price": row["w_price"]})
+                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": int(row["quantity"]),
+                                          "r_price": float(row["r_price"]), "w_price": float(row["w_price"])})
                     except:
                         tk.messagebox.showerror('Error', 'Error converting file: '
                                                          'Statistics sheet formatted improperly.')
@@ -739,12 +797,12 @@ class UI(tk.Tk):
                 for index, row in d1.iterrows():
                     try:
                         Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
-                                              "quantity": row["quantity"], "r_price": row["r_price"],
-                                              "w_price": row["w_price"]})
+                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
+                                              "w_price": float(row["w_price"])})
                         if not Stats.find_one({"barcode": row["barcode"]}):
                             Stats.insert_one({"time": datetime.now(), "barcode": row["barcode"],
-                                              "quantity": row["quantity"], "r_price": row["r_price"],
-                                              "w_price": row["w_price"]})
+                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
+                                              "w_price": float(row["w_price"])})
                         if not NameBcode.find_one(row["barcode"]) or not NameBcode.find_one(row["name"]):
                             NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
                     except:
