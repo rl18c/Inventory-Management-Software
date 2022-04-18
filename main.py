@@ -79,6 +79,7 @@ def barcode():
         message=output
     )
 
+
 class UI(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -96,7 +97,9 @@ class UI(tk.Tk):
         self.g_all_butt = None
         self.g_sel_butt = None
         self.close_butt = None
-
+        self.expt_butt = None
+        self.imp_butt = None
+        self.exp_butt = None
         # Init Editing widgets
         self.tree_frame = None
         self.entry_frame = None
@@ -155,7 +158,7 @@ class UI(tk.Tk):
 
         # Export Template button border
         expt_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        expt_bord.grid(column=11, row=17, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        expt_bord.grid(column=11, row=17, columnspan=2, rowspan=2, sticky=W, padx=25)
         # Import button border
         imp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         imp_bord.grid(column=11, row=14, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
@@ -633,7 +636,6 @@ class UI(tk.Tk):
                 tk.messagebox.showinfo('Success!', 'File created successfully.')
             else:
                 tk.messagebox.showerror('Error', 'Error creating file.')
-
 
     def inv_imp(self):
         # Hides Original window while modifying
