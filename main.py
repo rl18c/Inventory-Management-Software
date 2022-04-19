@@ -1,7 +1,3 @@
-# !!NOTE: FOR TESTING PURPOSES AND THIS EARLY VERSION, ALL INPUT OUTPUT WILL BE DONE IN CONSOLE.
-# !!THIS SHOULD BE TRANSFERRED TO UI ONCE WE BEGIN TO IMPLEMENT IT.
-
-
 # Main DB (Inventory) stores data in the format name: string, barcode: string, quantity: int, price: float
 # Secondary DB (Stats) stores data in the form: barcode:string, time:datetime, quantity:int
 # Tertiary DB (NameBcode) stores data in the form: name:string, barcode:string
@@ -21,23 +17,26 @@ from collections import OrderedDict
 import os
 import tkinter.messagebox
 import bcrypt
+
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
 
 db = client["InvManager"]
 loginsdb = client["loginManager"]
 login = loginsdb["logins"]
-#initializing the global vars for the users db
+# initializing the global vars for the users db
 Inventory = ""
 Stats = ""  # Used in determining stats over time for the inventory
 NameBcode = ""
 
+
 def hash_pw(password):
     return bcrypt.hashpw(password, bcrypt.gensalt())
-    
+
+
 def get_dat(collection):
     dicts = []
-    #performs checks if the db is empty in case no item added
+    # performs checks if the db is empty in case no item added
     temp = collection.find()
     temp = list(temp)
     if len(temp) != 0:
@@ -91,13 +90,17 @@ def barcode():
 
 
 class Login(tk.Tk):
-
     def __init__(self):
         super().__init__()
         self.geometry("500x220")
         self.title("Inventory Manager")
         self.resizable(False, False)
         self.configure(bg="#d0fbff")
+
+        # Instance Attribute initialization
+        self.top = None
+        self.usertxt = None
+        self.passtxt = None
 
         self.initialize_components()
 
@@ -128,28 +131,28 @@ class Login(tk.Tk):
 
         # login button
         login_butt = Button(but1_border, text="Login",
-                          bg="white",
-                          borderwidth=0,
-                          font=("Helvetica", 11),
-                          command=self.login)
+                            bg="white",
+                            borderwidth=0,
+                            font=("Helvetica", 11),
+                            command=self.login)
         login_butt.grid()
         login_butt.config(width=18)
 
         # signup button
         signup_butt = Button(but2_border, text="Sign Up",
-                           bg="white",
-                           font=("Helvetica", 11),
-                           borderwidth=0,
-                           command=self.signUp)
+                             bg="white",
+                             font=("Helvetica", 11),
+                             borderwidth=0,
+                             command=self.signUp)
         signup_butt.grid()
         signup_butt.config(width=18)
 
         # delete account button
         delete_butt = Button(but3_border, text="Delete Account",
-                           bg="white",
-                           font=("Helvetica", 11),
-                           borderwidth=0,
-                           command=self.delete)
+                             bg="white",
+                             font=("Helvetica", 11),
+                             borderwidth=0,
+                             command=self.delete)
         delete_butt.grid()
         delete_butt.config(width=18)
 
@@ -168,16 +171,16 @@ class Login(tk.Tk):
         self.top.title("login info")
         self.top.configure(bg="#d0fbff")
 
-        user_label=Label(self.top, text="Username",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        user_label = Label(self.top, text="Username",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         user_label.grid(row=0, column=0, columnspan=1, sticky=EW, pady=10)
 
-        pass_label=Label(self.top, text="Password",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        pass_label = Label(self.top, text="Password",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         pass_label.grid(row=1, column=0, columnspan=1, sticky=EW, pady=10)
 
         self.usertxt = Entry(self.top)
@@ -188,24 +191,24 @@ class Login(tk.Tk):
         self.passtxt.grid(row=1, column=1, columnspan=3, sticky=EW, pady=10)
 
         enter_butt = Button(self.top, text="Enter",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.loginCheck)
+                            bg="white",
+                            borderwidth=1,
+                            font=("Helvetica", 11),
+                            command=self.loginCheck)
         enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.top.destroy)
+                             bg="white",
+                             borderwidth=1,
+                             font=("Helvetica", 11),
+                             command=self.top.destroy)
         cancel_butt.grid(row=3, column=2, columnspan=2, sticky=EW, pady=10)
         cancel_butt.config(width=12, height=1)
 
     def loginCheck(self):
-        if login.find_one({"name" : self.usertxt.get(), "password" : hash(self.passtxt.get())}):
-            #grab correct inv
+        if login.find_one({"name": self.usertxt.get(), "password": hash(self.passtxt.get())}):
+            # grab correct inv
             global Inventory
             global Stats
             global NameBcode
@@ -229,22 +232,22 @@ class Login(tk.Tk):
         self.top.title("sign-up")
         self.top.configure(bg="#d0fbff")
 
-        user_label=Label(self.top, text="Enter Username",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        user_label = Label(self.top, text="Enter Username",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         user_label.grid(row=0, column=0, columnspan=1, sticky=EW, pady=10)
 
-        pass_label=Label(self.top, text="Enter Password",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        pass_label = Label(self.top, text="Enter Password",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         pass_label.grid(row=1, column=0, columnspan=1, sticky=EW, pady=10)
 
-        pass_label=Label(self.top, text="Re-Enter Password",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        pass_label = Label(self.top, text="Re-Enter Password",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         pass_label.grid(row=2, column=0, columnspan=1, sticky=EW, pady=10)
 
         self.newusertxt = Entry(self.top)
@@ -259,38 +262,38 @@ class Login(tk.Tk):
         self.newpass2txt.grid(row=2, column=1, columnspan=5, sticky=EW, pady=10)
 
         enter_butt = Button(self.top, text="Enter",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.signUpCheck)
+                            bg="white",
+                            borderwidth=1,
+                            font=("Helvetica", 11),
+                            command=self.signUpCheck)
         enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.top.destroy)
+                             bg="white",
+                             borderwidth=1,
+                             font=("Helvetica", 11),
+                             command=self.top.destroy)
         cancel_butt.grid(row=3, column=2, columnspan=2, sticky=EW, pady=10)
         cancel_butt.config(width=12, height=1)
 
     def signUpCheck(self):
-        if(self.newusertxt.get() == "" or self.newpasstxt == ""):
+        if (self.newusertxt.get() == "" or self.newpasstxt == ""):
             self.newusertxt.delete(0, END)
             self.newpasstxt.delete(0, END)
             self.newpass2txt.delete(0, END)
-            tkinter.messagebox.showinfo("Error", "Error: Username or Password can not be Blank")
+            tk.messagebox.showinfo("Error", "Error: Username or Password can not be Blank")
             self.top.lift()
         else:
-            if(self.newpass2txt.get() == self.newpasstxt.get()):
-                if login.find_one({"name" : self.newusertxt.get(), "password" : hash(self.newpasstxt.get())}):
+            if (self.newpass2txt.get() == self.newpasstxt.get()):
+                if login.find_one({"name": self.newusertxt.get(), "password": hash(self.newpasstxt.get())}):
                     self.newusertxt.delete(0, END)
                     self.newpasstxt.delete(0, END)
                     self.newpass2txt.delete(0, END)
-                    tkinter.messagebox.showinfo("Error", "Error: Username Already Exists")
+                    tk.messagebox.showinfo("Error", "Error: Username Already Exists")
                     self.top.lift()
                 else:
-                    login.insert_one({"name" : self.newusertxt.get(), "password" : hash(self.newpasstxt.get())})
+                    login.insert_one({"name": self.newusertxt.get(), "password": hash(self.newpasstxt.get())})
                     global Inventory
                     global Stats
                     global NameBcode
@@ -303,7 +306,7 @@ class Login(tk.Tk):
             else:
                 self.newpasstxt.delete(0, END)
                 self.newpass2txt.delete(0, END)
-                tkinter.messagebox.showinfo("Error", "Error: Password Mismatch")
+                tk.messagebox.showinfo("Error", "Error: Password Mismatch")
                 self.top.lift()
 
     def delete(self):
@@ -312,16 +315,16 @@ class Login(tk.Tk):
         self.top.title("Delete Account")
         self.top.configure(bg="#d0fbff")
 
-        user_label=Label(self.top, text="Username",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        user_label = Label(self.top, text="Username",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         user_label.grid(row=0, column=0, columnspan=1, sticky=EW, pady=10)
 
-        pass_label=Label(self.top, text="Password",
-                            bg="#d0fbff",
-                            fg="#9e5f00",
-                            font=("Helvetica", 16))
+        pass_label = Label(self.top, text="Password",
+                           bg="#d0fbff",
+                           fg="#9e5f00",
+                           font=("Helvetica", 16))
         pass_label.grid(row=1, column=0, columnspan=1, sticky=EW, pady=10)
 
         self.deleteusertxt = Entry(self.top)
@@ -332,24 +335,24 @@ class Login(tk.Tk):
         self.deletepasstxt.grid(row=1, column=1, columnspan=3, sticky=EW, pady=10)
 
         enter_butt = Button(self.top, text="Enter",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.deleteCheck)
+                            bg="white",
+                            borderwidth=1,
+                            font=("Helvetica", 11),
+                            command=self.deleteCheck)
         enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
-                          bg="white",
-                          borderwidth=1,
-                          font=("Helvetica", 11),
-                          command=self.top.destroy)
+                             bg="white",
+                             borderwidth=1,
+                             font=("Helvetica", 11),
+                             command=self.top.destroy)
         cancel_butt.grid(row=3, column=2, columnspan=2, sticky=EW, pady=10)
         cancel_butt.config(width=12, height=1)
 
     def deleteCheck(self):
-        if login.find_one({"name" : self.deleteusertxt.get(), "password" : self.deletepasstxt.get()}):
-            login.delete_one({"name" : self.deleteusertxt.get(), "password" : self.deletepasstxt.get()})
+        if login.find_one({"name": self.deleteusertxt.get(), "password": self.deletepasstxt.get()}):
+            login.delete_one({"name": self.deleteusertxt.get(), "password": self.deletepasstxt.get()})
             Inv = db[self.deleteusertxt.get() + "-Inventory"]
             stats = db[self.deleteusertxt.get() + "-Stats"]
             bcode = db[self.deleteusertxt.get() + "-NameBarcode"]
@@ -360,8 +363,9 @@ class Login(tk.Tk):
         else:
             self.deleteusertxt.delete(0, END)
             self.deletepasstxt.delete(0, END)
-            tkinter.messagebox.showinfo("Error", "Error: Account not Found")
+            tk.messagebox.showinfo("Error", "Error: Account not Found")
             self.top.lift()
+
 
 class UI(tk.Tk):
     def __init__(self, mas):
@@ -436,7 +440,7 @@ class UI(tk.Tk):
         # Add button border
         add_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
-        #Export button border
+        # Export button border
         exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
         exp_bord.grid(column=11, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
 
@@ -455,7 +459,7 @@ class UI(tk.Tk):
         # Close button border
         close_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
         close_bord.grid(column=11, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
-        #logout Button Border
+        # logout Button Border
         logout_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
         logout_bord.grid(column=9, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Adding buttons to frames
@@ -507,10 +511,10 @@ class UI(tk.Tk):
 
         # Export Template Data Button
         self.expt_butt = Button(expt_bord, text="Create Import Template",
-                               bg="white",
-                               borderwidth=0,
-                               font=("Helvetica", 11),
-                               command=self.inv_expt)
+                                bg="white",
+                                borderwidth=0,
+                                font=("Helvetica", 11),
+                                command=self.inv_expt)
         self.expt_butt.grid()
         self.expt_butt.config(width=18)
 
@@ -550,12 +554,12 @@ class UI(tk.Tk):
         self.close_butt.grid()
         self.close_butt.config(width=18)
 
-        #close Button
+        # close Button
         self.logout_butt = Button(logout_bord, text="Log Out",
-                                 bg="white",
-                                 font=("Helvetica", 11),
-                                 command=self.logout,
-                                 borderwidth=0)
+                                  bg="white",
+                                  font=("Helvetica", 11),
+                                  command=self.logout,
+                                  borderwidth=0)
 
         self.logout_butt.grid()
         self.logout_butt.config(width=18)
@@ -574,6 +578,7 @@ class UI(tk.Tk):
 
     def closingPop(self):
         sys.exit()
+
     def init_edit_view(self):
         # Create db_list outer frame
         self.tree_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
@@ -848,9 +853,9 @@ class UI(tk.Tk):
 
     def inv_exp(self):
         # Hides Original window while modifying
-        #self.withdraw()
+        # self.withdraw()
         # This is where we must open new window to add Inventory DB
-        #expd = ExportData(self)
+        # expd = ExportData(self)
         directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
         if directory:
             filename = None
@@ -861,13 +866,14 @@ class UI(tk.Tk):
             label.pack(side="top", fill="x", pady=10)
             n_entry = Entry(popup, textvariable=filename)
             n_entry.pack()
+
             def get_in():
                 nonlocal filename
                 nonlocal directory
                 filename = n_entry.get()
                 if filename:
                     popup.destroy()
-                path = directory +"/"+ filename + ".xlsx"
+                path = directory + "/" + filename + ".xlsx"
                 if os.path.exists(path):
                     MsgBox = tk.messagebox.askquestion('File Exists',
                                                        'File exists. Would you like to overwrite the file?',
@@ -898,26 +904,24 @@ class UI(tk.Tk):
                 else:
                     tk.messagebox.showerror('Error', 'Error creating file.')
 
-
-
             B1 = ttk.Button(popup, text="Submit", command=get_in)
             B1.pack()
 
     def inv_expt(self):
         # Hides Original window while modifying
-        #self.withdraw()
+        # self.withdraw()
         # This is where we must open new window to add Inventory DB
-        #expd = ExportData(self)
+        # expd = ExportData(self)
         directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
         if directory:
-            path = directory +"/template.xlsx"
+            path = directory + "/template.xlsx"
             if os.path.exists(path):
                 try:
                     os.remove(path)
                 except:
                     tk.messagebox.showerror('Error', 'Error remaking file: template.xlsx in use.')
                     return
-                inv_data= [['NAME', '0000', 0, "0.00", "0.00"]]
+                inv_data = [['NAME', '0000', 0, "0.00", "0.00"]]
                 stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00", "0.00"]]
                 nbc_data = [['NAME', '0000']]
                 d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode', 'quantity', 'r_price', 'w_price'])
@@ -1038,7 +1042,6 @@ class UI(tk.Tk):
                                                          'Unique Name Barcodes sheet formatted improperly.')
                         return
                 tk.messagebox.showinfo('Success!', 'Database written successfully.')
-
 
             elif result is False:
                 d1 = d1.reset_index()
@@ -1678,6 +1681,7 @@ class GraphMenu(tk.Tk):
     def close_graph(self):
         self.deiconify()
         self.popup_g.destroy()
+
 
 
 if __name__ == '__main__':
