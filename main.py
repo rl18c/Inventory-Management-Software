@@ -88,7 +88,6 @@ def barcode():
         message=output
     )
 
-
 class Login(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -861,8 +860,7 @@ class UI(tk.Tk):
         # Hides Original window while modifying
         self.withdraw()
         # This is where we must open new window to add Inventory DB
-        addn = AddNew(self)
-        print("Added")
+        addn = AddNew(self, self.main_window)
 
     def inv_exp(self):
         # Hides Original window while modifying
@@ -1176,9 +1174,10 @@ test_entries = [
 
 
 class AddNew(tk.Tk):
-    def __init__(self, mas):
+    def __init__(self, mas, super_mas):
         super().__init__()
         self.main_window = mas
+        self.login_mas = super_mas
         self.configure(bg="#d0fbff")
         self.title("New Item")
         # self.geometry("330x300")
@@ -1352,7 +1351,8 @@ class AddNew(tk.Tk):
             self.a_butt.config(state="disabled")
 
     def close_win(self):
-        self.main_window.deiconify()
+        self.main_window.destroy()
+        goBack = UI(self.login_mas)
         self.destroy()
 
 
