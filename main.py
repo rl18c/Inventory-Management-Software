@@ -27,15 +27,20 @@ client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongo
 db = client["InvManager"]
 loginsdb = client["loginManager"]
 login = loginsdb["logins"]
+#initializing the global vars for the users db
 Inventory = ""
-Stats = db["StatsTime"]  # Used in determining stats over time for the inventory
-NameBcode = db["NameBarcode"]
+Stats = ""  # Used in determining stats over time for the inventory
+NameBcode = ""
 
 
 def get_dat(collection):
     dicts = []
-    for x in collection.find():
-        dicts.append(x)
+    #performs checks if the db is empty in case no item added
+    temp = collection.find()
+    temp = list(temp)
+    if len(temp) != 0:
+        for x in collection.find():
+            dicts.append(x)
     return dicts
 
 
@@ -282,7 +287,9 @@ class Login(tk.Tk):
                     self.top.lift()
                 else:
                     login.insert_one({"name" : self.newusertxt.get(), "password" : self.newpasstxt.get()})
-
+                    global Inventory
+                    global Stats
+                    global NameBcode
                     Inventory = db[self.newusertxt.get() + "-Inventory"]
                     Stats = db[self.newusertxt.get() + "-Stats"]
                     NameBcode = db[self.newusertxt.get() + "-NameBarcode"]
@@ -340,7 +347,12 @@ class Login(tk.Tk):
     def deleteCheck(self):
         if login.find_one({"name" : self.deleteusertxt.get(), "password" : self.deletepasstxt.get()}):
             login.delete_one({"name" : self.deleteusertxt.get(), "password" : self.deletepasstxt.get()})
-            Inventory.drop()
+            Inv = db[self.deleteusertxt.get() + "-Inventory"]
+            stats = db[self.deleteusertxt.get() + "-Stats"]
+            bcode = db[self.deleteusertxt.get() + "-NameBarcode"]
+            Inv.drop()
+            stats.drop()
+            bcode.drop()
             self.top.destroy()
         else:
             self.deleteusertxt.delete(0, END)
@@ -440,7 +452,9 @@ class UI(tk.Tk):
         # Close button border
         close_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
         close_bord.grid(column=11, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
-
+        #logout Button Border
+        logout_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
+        logout_bord.grid(column=9, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
         # Adding buttons to frames
 
         # Remove button
@@ -533,6 +547,30 @@ class UI(tk.Tk):
         self.close_butt.grid()
         self.close_butt.config(width=18)
 
+        #close Button
+        self.logout_butt = Button(logout_bord, text="Log Out",
+                                 bg="white",
+                                 font=("Helvetica", 11),
+                                 command=self.logout,
+                                 borderwidth=0)
+
+        self.logout_butt.grid()
+        self.logout_butt.config(width=18)
+
+        self.protocol("WM_DELETE_WINDOW", self.closingPop)
+
+    def logout(self):
+        global Inventory
+        global Stats
+        global NameBcode
+        Inventory = ""
+        Stats = ""
+        NameBcode = ""
+        self.main_window.deiconify()
+        self.destroy()
+
+    def closingPop(self):
+        sys.exit()
     def init_edit_view(self):
         # Create db_list outer frame
         self.tree_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
