@@ -20,7 +20,7 @@ import tkcalendar as cal
 from collections import OrderedDict
 import os
 import tkinter.messagebox
-
+import bcrypt
 client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
 
 
@@ -32,7 +32,9 @@ Inventory = ""
 Stats = ""  # Used in determining stats over time for the inventory
 NameBcode = ""
 
-
+def hash_pw(password):
+    return bcrypt.hashpw(password, bcrypt.gensalt())
+    
 def get_dat(collection):
     dicts = []
     #performs checks if the db is empty in case no item added
@@ -202,7 +204,7 @@ class Login(tk.Tk):
         cancel_butt.config(width=12, height=1)
 
     def loginCheck(self):
-        if login.find_one({"name" : self.usertxt.get(), "password" : self.passtxt.get()}):
+        if login.find_one({"name" : self.usertxt.get(), "password" : hash(self.passtxt.get())}):
             #grab correct inv
             global Inventory
             global Stats
@@ -210,6 +212,8 @@ class Login(tk.Tk):
             Stats = db[self.usertxt.get() + "-Stats"]
             Inventory = db[self.usertxt.get() + "-Inventory"]
             NameBcode = db[self.usertxt.get() + "-NameBarcode"]
+            print(hash(self.passtxt.get()))
+
             self.top.destroy()
             self.withdraw()
             loginm = UI(self)
@@ -279,21 +283,20 @@ class Login(tk.Tk):
             self.top.lift()
         else:
             if(self.newpass2txt.get() == self.newpasstxt.get()):
-                if login.find_one({"name" : self.newusertxt.get(), "password" : self.newpasstxt.get()}):
+                if login.find_one({"name" : self.newusertxt.get(), "password" : hash(self.newpasstxt.get())}):
                     self.newusertxt.delete(0, END)
                     self.newpasstxt.delete(0, END)
                     self.newpass2txt.delete(0, END)
                     tkinter.messagebox.showinfo("Error", "Error: Username Already Exists")
                     self.top.lift()
                 else:
-                    login.insert_one({"name" : self.newusertxt.get(), "password" : self.newpasstxt.get()})
+                    login.insert_one({"name" : self.newusertxt.get(), "password" : hash(self.newpasstxt.get())})
                     global Inventory
                     global Stats
                     global NameBcode
                     Inventory = db[self.newusertxt.get() + "-Inventory"]
                     Stats = db[self.newusertxt.get() + "-Stats"]
                     NameBcode = db[self.newusertxt.get() + "-NameBarcode"]
-                    #Inventory.insert_one({"r_price" : 0, "w_price" : 0, "name" : "Test-Stub", "quantity" : 0, "barcode" : 0})
                     self.top.destroy()
                     self.withdraw()
                     loginm = UI(self)
