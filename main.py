@@ -161,7 +161,7 @@ class Login(tk.Tk):
                             bg="white",
                             font=("Helvetica", 11),
                             borderwidth=0,
-                            command=self.destroy)
+                            command=self.close_win)
         close_butt.grid()
         close_butt.config(width=18)
 
@@ -207,23 +207,30 @@ class Login(tk.Tk):
         cancel_butt.config(width=12, height=1)
 
     def loginCheck(self):
-        if login.find_one({"name": self.usertxt.get(), "password": hash(self.passtxt.get())}):
-            # grab correct inv
-            global Inventory
-            global Stats
-            global NameBcode
-            Stats = db[self.usertxt.get() + "-Stats"]
-            Inventory = db[self.usertxt.get() + "-Inventory"]
-            NameBcode = db[self.usertxt.get() + "-NameBarcode"]
-            print(hash(self.passtxt.get()))
+        if login.find_one({"name": self.usertxt.get()}):
+            log_acc = login.find_one({"name": self.usertxt.get()})
+            pwd = log_acc["password"]
+            if bcrypt.checkpw(self.passtxt.get().encode('utf-8'), pwd):
+                # grab correct inv
+                global Inventory
+                global Stats
+                global NameBcode
+                Stats = db[self.usertxt.get() + "-Stats"]
+                Inventory = db[self.usertxt.get() + "-Inventory"]
+                NameBcode = db[self.usertxt.get() + "-NameBarcode"]
 
-            self.top.destroy()
-            self.withdraw()
-            loginm = UI(self)
+                self.top.destroy()
+                self.withdraw()
+                loginm = UI(self)
+            else:
+                self.usertxt.delete(0, END)
+                self.passtxt.delete(0, END)
+                tkinter.messagebox.showinfo("Error", "Error: Password Incorrect")
+                self.top.lift()
         else:
             self.usertxt.delete(0, END)
             self.passtxt.delete(0, END)
-            tkinter.messagebox.showinfo("Error", "Error: Username or Password Incorrect")
+            tkinter.messagebox.showinfo("Error", "Error: Username not found")
             self.top.lift()
 
     def signUp(self):
@@ -286,14 +293,15 @@ class Login(tk.Tk):
             self.top.lift()
         else:
             if (self.newpass2txt.get() == self.newpasstxt.get()):
-                if login.find_one({"name": self.newusertxt.get(), "password": hash(self.newpasstxt.get())}):
+                if login.find_one({"name": self.newusertxt.get()}):
                     self.newusertxt.delete(0, END)
                     self.newpasstxt.delete(0, END)
                     self.newpass2txt.delete(0, END)
                     tk.messagebox.showinfo("Error", "Error: Username Already Exists")
                     self.top.lift()
                 else:
-                    login.insert_one({"name": self.newusertxt.get(), "password": hash(self.newpasstxt.get())})
+                    thehash = bcrypt.hashpw(self.newpasstxt.get().encode('utf-8'), bcrypt.gensalt())
+                    login.insert_one({"name": self.newusertxt.get(), "password": thehash})
                     global Inventory
                     global Stats
                     global NameBcode
@@ -365,6 +373,10 @@ class Login(tk.Tk):
             self.deletepasstxt.delete(0, END)
             tk.messagebox.showinfo("Error", "Error: Account not Found")
             self.top.lift()
+
+    def close_win(self):
+        self.destroy()
+        exit()
 
 
 class UI(tk.Tk):
@@ -850,6 +862,7 @@ class UI(tk.Tk):
         self.withdraw()
         # This is where we must open new window to add Inventory DB
         addn = AddNew(self)
+        print("Added")
 
     def inv_exp(self):
         # Hides Original window while modifying
