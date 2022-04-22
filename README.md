@@ -1,14 +1,13 @@
 # CIS-4930-Group
 
 
-========================================
 Problem Being Solved		       
-========================================
+=================================
 A system to manage individual user's Inventory databases. Statistical representation of stock and
 profit analysis overtime.
-========================================
+
 GUI Description
-========================================
+=================================
 Login Screen : 	- Can create new User (Creates personal DB Collections)
 		- Can login with existing User
 		- Can delete existing User
@@ -20,9 +19,8 @@ Main Window  : 	- Browse Inventory records and make modifications
 Graph Window : 	- Graph Stock Changes / Graph Calculated Profit  (Both based off quantity changes)
 
 
-========================================
 Final List of Libraries Used		
-========================================
+=================================
 -pymongo
 -MatPlotlib
 -random
@@ -36,15 +34,13 @@ Final List of Libraries Used
 -bcrypt
 
 
-========================================
 Other Resources		
-========================================
+=================================
 No other resources were used.
 
 
-========================================
 Separation of Work	
-========================================
+=================================
 Aaron Peronto
 	- Developed entire User login system.
 		- Login GUI Design
@@ -67,9 +63,8 @@ Cory Avrutis
 	- Assisted in user password hashing
 
 
-========================================
 Format of Database
-========================================
+=================================
 
 The format of each part of the database is included in main.py, and below is a clearer 
 look on the purpose of each.
