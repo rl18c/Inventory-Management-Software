@@ -49,11 +49,9 @@ Aaron Peronto
 
 Robert Lovern 
 	- Managed/Created most of the code interacting directly with DB collections
-
 	- Handled statistical analysis of user's DB information
 		- Logic to calculate Stock/Profit changes 
 		- Used these statistics to plot on Graph
-
 	- Handled graph generation
 
 Cory Avrutis
