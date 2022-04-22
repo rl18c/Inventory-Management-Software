@@ -18,6 +18,9 @@ Main Window  : 	- Browse Inventory records and make modifications
 		- Can Graph the Current Selected Item / Graph All Items
 Graph Window : 	- Graph Stock Changes / Graph Calculated Profit  (Both based off quantity changes)
 
+Notes :	- When trying to run the database on FSU's internet, we realized a VPN is required.
+		- A login for testing used by us was: Username: test1 Password: test1
+
 
 Final List of Libraries Used		
 =================================
@@ -63,6 +66,18 @@ Cory Avrutis
 	- Managed the interaction of widgets with actual DB operations
 		- DB operation logic ported from Robert's implementation
 	- Assisted in user password hashing
+
+
+Extra Features from Proposal	
+=================================
+
+A change we made from our proposal was how the user can view the inventory metrics,
+mainly in the change from a simple printout detailing their statistics. We decided to shift
+into using graphs and adding in an optional export/import functionality to allow the user
+more control over the database if they want it. Another major change was our inclusion of
+login functionality. We decided that having multiple collections would help us with
+testing, and since many applications of today have this functionality, we decided to
+research and include it in our app.
 
 
 Format of Database

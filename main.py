@@ -1,5 +1,7 @@
-# Main DB (Inventory) stores data in the format name: string, barcode: string, quantity: int, price: float
-# Secondary DB (Stats) stores data in the form: barcode:string, time:datetime, quantity:int
+# Main DB (Inventory) stores data in the format name: string, barcode: string,
+# quantity: int, price: float
+# Secondary DB (Stats) stores data in the form: barcode:string, time:datetime,
+# quantity:int
 # Tertiary DB (NameBcode) stores data in the form: name:string, barcode:string
 from datetime import datetime, timedelta
 import random
@@ -18,13 +20,15 @@ import os
 import tkinter.messagebox
 import bcrypt
 
-client = pymongo.MongoClient("mongodb+srv://pygroup:rcagroup@project.uxruw.mongodb.net/InvManager")
+client = pymongo.MongoClient("mongodb+srv://pygroup:"
+                             "rcagroup@project.uxruw.mongodb.net/InvManager")
 
 
 db = client["InvManager"]
 loginsdb = client["loginManager"]
 login = loginsdb["logins"]
 # initializing the global vars for the users db
+head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
 Inventory = ""
 Stats = ""  # Used in determining stats over time for the inventory
 NameBcode = ""
@@ -44,49 +48,6 @@ def get_dat(collection):
             dicts.append(x)
     return dicts
 
-
-def inv():
-    output = ""
-    res = get_dat(Inventory)
-    j = 0
-    for i in res:
-        j += 1
-        output += ("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode']
-                   + ", Quantity: " + str(i['quantity']) + ", Price: $" + str(i['price']) + "\n")
-
-    tk.messagebox.showinfo(
-        title='Inventory',
-        message=output
-    )
-
-
-def stat():
-    output = ""
-    res = get_dat(Stats)
-    j = 0
-    for i in res:
-        j += 1
-        output += ("[" + str(j) + "] " + "Barcode: " + i['barcode'] + ", Time: " + str(i['time'])
-                   + ", Quantity: " + str(i['quantity']) + "\n")
-
-    tk.messagebox.showinfo(
-        title='Statistics',
-        message=output
-    )
-
-
-def barcode():
-    output = ""
-    res = get_dat(NameBcode)
-    j = 0
-    for i in res:
-        j += 1
-        output += ("[" + str(j) + "] " + "Name: " + i['name'] + ", Barcode: " + i['barcode'] + "\n")
-
-    tk.messagebox.showinfo(
-        title='Barcodes',
-        message=output
-    )
 
 class Login(tk.Tk):
     def __init__(self):
@@ -116,16 +77,23 @@ class Login(tk.Tk):
         title_label.grid(row=0, column=1, columnspan=3, sticky=EW, pady=10)
 
         # Button Frame 1
-        but1_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but1_border.grid(column=0, row=1, columnspan=2, sticky=W, padx=25, pady=10)
+        but1_border = Frame(self, highlightthickness=2,
+                            highlightbackground="#37d3ff")
+        but1_border.grid(column=0, row=1, columnspan=2,
+                         sticky=W, padx=25, pady=10)
         # Button Frame 2
-        but2_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but2_border.grid(column=0, row=3, columnspan=2, sticky=W, padx=25, pady=10)
+        but2_border = Frame(self, highlightthickness=2,
+                            highlightbackground="#37d3ff")
+        but2_border.grid(column=0, row=3, columnspan=2,
+                         sticky=W, padx=25, pady=10)
         # Button Frame 3
-        but3_border = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        but3_border.grid(column=0, row=5, columnspan=2, sticky=W, padx=25, pady=10)
+        but3_border = Frame(self, highlightthickness=2,
+                            highlightbackground="#37d3ff")
+        but3_border.grid(column=0, row=5, columnspan=2, sticky=W,
+                         padx=25, pady=10)
         # Button Frame 4
-        but4_border = Frame(self, highlightthickness=2, highlightbackground="#d10000")
+        but4_border = Frame(self, highlightthickness=2,
+                            highlightbackground="#d10000")
         but4_border.grid(column=2, row=3, columnspan=2, padx=25)
 
         # login button
@@ -194,7 +162,8 @@ class Login(tk.Tk):
                             borderwidth=1,
                             font=("Helvetica", 11),
                             command=self.loginCheck)
-        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
+        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10,
+                        padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
@@ -224,7 +193,8 @@ class Login(tk.Tk):
             else:
                 self.usertxt.delete(0, END)
                 self.passtxt.delete(0, END)
-                tkinter.messagebox.showinfo("Error", "Error: Password Incorrect")
+                tkinter.messagebox.showinfo("Error", "Error: Password "
+                                                     "Incorrect")
                 self.top.lift()
         else:
             self.usertxt.delete(0, END)
@@ -265,14 +235,16 @@ class Login(tk.Tk):
 
         self.newpass2txt = Entry(self.top)
         self.newpass2txt.config(show="*")
-        self.newpass2txt.grid(row=2, column=1, columnspan=5, sticky=EW, pady=10)
+        self.newpass2txt.grid(row=2, column=1, columnspan=5, sticky=EW,
+                              pady=10)
 
         enter_butt = Button(self.top, text="Enter",
                             bg="white",
                             borderwidth=1,
                             font=("Helvetica", 11),
                             command=self.signUpCheck)
-        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
+        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10,
+                        padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
@@ -288,7 +260,8 @@ class Login(tk.Tk):
             self.newusertxt.delete(0, END)
             self.newpasstxt.delete(0, END)
             self.newpass2txt.delete(0, END)
-            tk.messagebox.showinfo("Error", "Error: Username or Password can not be Blank")
+            tk.messagebox.showinfo("Error", "Error: Username or Password can "
+                                            "not be Blank")
             self.top.lift()
         else:
             if (self.newpass2txt.get() == self.newpasstxt.get()):
@@ -296,11 +269,15 @@ class Login(tk.Tk):
                     self.newusertxt.delete(0, END)
                     self.newpasstxt.delete(0, END)
                     self.newpass2txt.delete(0, END)
-                    tk.messagebox.showinfo("Error", "Error: Username Already Exists")
+                    tk.messagebox.showinfo("Error", "Error: Username Already "
+                                                    "Exists")
                     self.top.lift()
                 else:
-                    thehash = bcrypt.hashpw(self.newpasstxt.get().encode('utf-8'), bcrypt.gensalt())
-                    login.insert_one({"name": self.newusertxt.get(), "password": thehash})
+                    thehash = bcrypt.hashpw(
+                        self.newpasstxt.get().encode('utf-8'),
+                        bcrypt.gensalt())
+                    login.insert_one({"name": self.newusertxt.get(),
+                                      "password": thehash})
                     global Inventory
                     global Stats
                     global NameBcode
@@ -335,18 +312,21 @@ class Login(tk.Tk):
         pass_label.grid(row=1, column=0, columnspan=1, sticky=EW, pady=10)
 
         self.deleteusertxt = Entry(self.top)
-        self.deleteusertxt.grid(row=0, column=1, columnspan=3, sticky=EW, pady=10)
+        self.deleteusertxt.grid(row=0, column=1, columnspan=3, sticky=EW,
+                                pady=10)
 
         self.deletepasstxt = Entry(self.top)
         self.deletepasstxt.config(show="*")
-        self.deletepasstxt.grid(row=1, column=1, columnspan=3, sticky=EW, pady=10)
+        self.deletepasstxt.grid(row=1, column=1, columnspan=3, sticky=EW,
+                                pady=10)
 
         enter_butt = Button(self.top, text="Enter",
                             bg="white",
                             borderwidth=1,
                             font=("Helvetica", 11),
                             command=self.deleteCheck)
-        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10, padx=22)
+        enter_butt.grid(row=3, column=0, columnspan=2, sticky=EW, pady=10,
+                        padx=22)
         enter_butt.config(width=12, height=1)
 
         cancel_butt = Button(self.top, text="Cancel",
@@ -358,8 +338,10 @@ class Login(tk.Tk):
         cancel_butt.config(width=12, height=1)
 
     def deleteCheck(self):
-        if login.find_one({"name": self.deleteusertxt.get(), "password": self.deletepasstxt.get()}):
-            login.delete_one({"name": self.deleteusertxt.get(), "password": self.deletepasstxt.get()})
+        if login.find_one({"name": self.deleteusertxt.get(),
+                           "password": self.deletepasstxt.get()}):
+            login.delete_one({"name": self.deleteusertxt.get(),
+                              "password": self.deletepasstxt.get()})
             Inv = db[self.deleteusertxt.get() + "-Inventory"]
             stats = db[self.deleteusertxt.get() + "-Stats"]
             bcode = db[self.deleteusertxt.get() + "-NameBarcode"]
@@ -378,6 +360,7 @@ class Login(tk.Tk):
         exit()
 
 
+# Main window of UI
 class UI(tk.Tk):
     def __init__(self, mas):
         super().__init__()
@@ -440,39 +423,61 @@ class UI(tk.Tk):
     def init_buttons(self):
         # Define 7 borders for each button
         # Remove button border
-        rem_bord = Frame(self, highlightthickness=2, highlightbackground="#eb7d34")
-        rem_bord.grid(column=0, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        rem_bord = Frame(self, highlightthickness=2,
+                         highlightbackground="#eb7d34")
+        rem_bord.grid(column=0, row=20, columnspan=2, rowspan=2, sticky=W,
+                      padx=25, pady=10)
         # Modify button Border
-        mod_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        mod_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        mod_bord = Frame(self, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        mod_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=W,
+                      padx=25, pady=10)
         # Update button border
-        up_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        up_bord.grid(column=6, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        up_bord = Frame(self, highlightthickness=2,
+                        highlightbackground="#37d3ff")
+        up_bord.grid(column=6, row=20, columnspan=2, rowspan=2, sticky=W,
+                     padx=25, pady=10)
         # Add button border
-        add_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        add_bord = Frame(self, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        add_bord.grid(column=9, row=20, columnspan=2, rowspan=2, sticky=W,
+                      padx=25, pady=10)
         # Export button border
-        exp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        exp_bord.grid(column=11, row=20, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        exp_bord = Frame(self, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        exp_bord.grid(column=11, row=20, columnspan=2, rowspan=2, sticky=W,
+                      padx=25, pady=10)
 
         # Export Template button border
-        expt_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        expt_bord.grid(column=11, row=17, columnspan=2, rowspan=2, sticky=W, padx=25)
+        expt_bord = Frame(self, highlightthickness=2,
+                          highlightbackground="#37d3ff")
+        expt_bord.grid(column=11, row=17, columnspan=2, rowspan=2, sticky=W,
+                       padx=25)
         # Import button border
-        imp_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        imp_bord.grid(column=11, row=14, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        imp_bord = Frame(self, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        imp_bord.grid(column=11, row=14, columnspan=2, rowspan=2, sticky=W,
+                      padx=25, pady=10)
         # Graph all button border
-        g_all_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        g_all_bord = Frame(self, highlightthickness=2,
+                           highlightbackground="#37d3ff")
+        g_all_bord.grid(column=11, row=6, columnspan=2, rowspan=2, sticky=W,
+                        padx=25, pady=10)
         # Graph selection button border
-        g_sel_bord = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
-        g_sel_bord.grid(column=11, row=10, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        g_sel_bord = Frame(self, highlightthickness=2,
+                           highlightbackground="#37d3ff")
+        g_sel_bord.grid(column=11, row=10, columnspan=2, rowspan=2, sticky=W,
+                        padx=25, pady=10)
         # Close button border
-        close_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
-        close_bord.grid(column=11, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        close_bord = Frame(self, highlightthickness=2,
+                           highlightbackground="#d10000")
+        close_bord.grid(column=11, row=0, columnspan=2, rowspan=2, sticky=W,
+                        padx=25, pady=10)
         # logout Button Border
-        logout_bord = Frame(self, highlightthickness=2, highlightbackground="#d10000")
-        logout_bord.grid(column=9, row=0, columnspan=2, rowspan=2, sticky=W, padx=25, pady=10)
+        logout_bord = Frame(self, highlightthickness=2,
+                            highlightbackground="#d10000")
+        logout_bord.grid(column=9, row=0, columnspan=2, rowspan=2, sticky=W,
+                         padx=25, pady=10)
         # Adding buttons to frames
 
         # Remove button
@@ -548,11 +553,12 @@ class UI(tk.Tk):
         self.g_all_butt.config(width=18)
 
         # Graph Selection button
-        self.g_sel_butt = Button(g_sel_bord, text="Graph Selection", state="disabled",
-                                 bg="white",
-                                 borderwidth=0,
+        self.g_sel_butt = Button(g_sel_bord, text="Graph Selection",
+                                 state="disabled", bg="white", borderwidth=0,
                                  font=("Helvetica", 11),
-                                 command=lambda: self.graph_menu(str(self.tree.item(self.cur)["values"][1])))
+                                 command=lambda:
+                                 self.graph_menu(str(
+                                     self.tree.item(self.cur)["values"][1])))
         self.g_sel_butt.grid()
         self.g_sel_butt.config(width=18)
 
@@ -592,35 +598,45 @@ class UI(tk.Tk):
 
     def init_edit_view(self):
         # Create db_list outer frame
-        self.tree_frame = Frame(self, highlightthickness=2, highlightbackground="#37d3ff")
+        self.tree_frame = Frame(self, highlightthickness=2,
+                                highlightbackground="#37d3ff")
         self.tree_frame.grid_rowconfigure(0, weight=1)
         self.tree_frame.grid_columnconfigure(0, weight=1)
-        self.tree_frame.grid(column=1, row=3, columnspan=4, rowspan=15, sticky=W, padx=25, pady=10)
+        self.tree_frame.grid(column=1, row=3, columnspan=4, rowspan=15,
+                             sticky=W, padx=25, pady=10)
 
         # Create frame for updating an entry
         self.entry_frame = Frame(self, bg="#d0fbff")
         self.entry_frame.grid_rowconfigure(0, weight=1)
         self.entry_frame.grid_columnconfigure(0, weight=1)
-        self.entry_frame.grid(column=6, row=3, columnspan=5, rowspan=15, sticky=W, padx=25, pady=10)
+        self.entry_frame.grid(column=6, row=3, columnspan=5, rowspan=15,
+                              sticky=W, padx=25, pady=10)
 
         # Create 5 labels for up_frame
-        self.n_lbl = Label(self.entry_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        self.n_lbl = Label(self.entry_frame, text="Name >",
+                           font=("Helvetica", 11), bg="#d0fbff")
         self.n_lbl.grid(row=5, column=6, sticky=E)
-        self.b_lbl = Label(self.entry_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        self.b_lbl = Label(self.entry_frame, text="Barcode >",
+                           font=("Helvetica", 11), bg="#d0fbff")
         self.b_lbl.grid(row=8, column=6, sticky=E)
-        self.q_lbl = Label(self.entry_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        self.q_lbl = Label(self.entry_frame, text="Quantity >",
+                           font=("Helvetica", 11), bg="#d0fbff")
         self.q_lbl.grid(row=11, column=6, sticky=E)
-        self.rp_lbl = Label(self.entry_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.rp_lbl = Label(self.entry_frame, text="Retail Price >",
+                            font=("Helvetica", 11), bg="#d0fbff")
         self.rp_lbl.grid(row=14, column=6, sticky=E)
-        self.wp_lbl = Label(self.entry_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        self.wp_lbl = Label(self.entry_frame, text="Wholesale Price >",
+                            font=("Helvetica", 11), bg="#d0fbff")
         self.wp_lbl.grid(row=17, column=6, sticky=E)
 
         # Create Entry Information Label
-        entry_lbl = Label(self.entry_frame, text="Current Entry Information", font=("Helvetica", 13), bg="#d0fbff")
+        entry_lbl = Label(self.entry_frame, text="Current Entry Information",
+                          font=("Helvetica", 13), bg="#d0fbff")
         entry_lbl.grid(row=3, column=7, columnspan=3, rowspan=2, sticky=N)
 
         # Create Title Label for screen
-        entry_lbl = Label(self, text="Inventory Tracker", font=("Helvetica", 20), bg="#d0fbff")
+        entry_lbl = Label(self, text="Inventory Tracker",
+                          font=("Helvetica", 20), bg="#d0fbff")
         entry_lbl.grid(row=0, column=2, columnspan=8, rowspan=2, sticky=S)
 
         # Create 5 Entry boxes for up_frame
@@ -636,7 +652,8 @@ class UI(tk.Tk):
         self.wp_entry.grid(row=17, column=7, columnspan=4, pady=15)
 
         # Create text area for db entries
-        self.tree = ttk.Treeview(self.tree_frame, columns=head, show="headings",
+        self.tree = ttk.Treeview(self.tree_frame, columns=head,
+                                 show="headings",
                                  selectmode="browse",
                                  height=16)
         # Define each column's width
@@ -652,19 +669,22 @@ class UI(tk.Tk):
         self.tree.heading("Quantity", text="Quantity")
         self.tree.heading("r_price", text="Retail Price")
         self.tree.heading("w_price", text="Wholesale Price")
-        self.tree.grid(row=3, column=1, columnspan=4, sticky="nsew", pady=5, padx=5)
+        self.tree.grid(row=3, column=1, columnspan=4, sticky="nsew", pady=5,
+                       padx=5)
         # Binding a selection change to function
         self.tree.bind("<<TreeviewSelect>>", self.select_changed)
 
         data = get_dat(Inventory)
         # Populating with database data
         for d in data:
-            l = (d["name"], d["barcode"], str(d["quantity"]), "$" + "{:.2f}".format(d["r_price"]),
+            l = (d["name"], d["barcode"], str(d["quantity"]),
+                 "$" + "{:.2f}".format(d["r_price"]),
                  "$" + "{:.2f}".format(d["w_price"]))
             self.tree.insert("", END, values=l)
 
         # Create scrollbar on right side
-        self.scroll = Scrollbar(self.tree_frame, orient="vertical", command=self.tree.yview)
+        self.scroll = Scrollbar(self.tree_frame, orient="vertical",
+                                command=self.tree.yview)
         self.scroll.grid(row=3, column=5, rowspan=16, sticky="nse")
         self.tree.config(yscrollcommand=self.scroll.set)
 
@@ -674,14 +694,16 @@ class UI(tk.Tk):
             self.modifying = True
             self.enable_modifications()
         else:
-            tk.messagebox.showerror(title="No Selection", message="No selected item to modify.")
+            tk.messagebox.showerror(title="No Selection",
+                                    message="No selected item to modify.")
 
     # Called everytime selection in treeview changes
     def select_changed(self, event):
         self.g_sel_butt["state"] = "normal"
         if self.modifying:
             if tk.messagebox.askyesno(title="Switch",
-                                      message="Are you sure you want to terminate modifications?"):
+                                      message="Are you sure you want to "
+                                              "terminate modifications?"):
                 self.cur = self.tree.focus()
                 i = self.tree.item(self.cur)
                 self.n_str.set(i["values"][0])
@@ -724,67 +746,92 @@ class UI(tk.Tk):
             if del_stats:
                 Stats.delete_many({"barcode": bar_val})
             tk.messagebox.showinfo(title="Item Deletion",
-                                   message="Item : " + name_val + " has been deleted.")
+                                   message="Item : " + name_val + " has been"
+                                                                  " deleted.")
         else:
-            tk.messagebox.showerror(title="No Selection", message="No selected item to remove.")
+            tk.messagebox.showerror(title="No Selection", message="No selected"
+                                                                  " item to "
+                                                                  "remove.")
 
     # Called when user clicks Update Item
     def db_update(self):
-        # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
+        # Check that barcode==int && quantity==int && price==float
+        # (With at most 2 decimal places)
         if not self.b_str.get().isdigit():
-            tk.messagebox.showerror(title="Invalid Barcode", message="Barcode must be comprised of only integers.")
+            tk.messagebox.showerror(title="Invalid Barcode",
+                                    message="Barcode must be comprised of only "
+                                            "integers.")
             return
         if not self.q_str.get().isdigit():
-            tk.messagebox.showerror(title="Invalid Quantity", message="Quantity must be a whole integer.")
+            tk.messagebox.showerror(title="Invalid Quantity",
+                                    message="Quantity must be a whole "
+                                            "integer.")
             return
         try:
             float(self.rp_str.get())
             float(self.wp_str.get())
-            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) > 2:
+            if "." in self.rp_str.get() and \
+                    len(self.rp_str.get().rsplit(".")[1]) > 2:
                 raise ValueError
-            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) < 2:
+            if "." in self.rp_str.get() and \
+                    len(self.rp_str.get().rsplit(".")[1]) < 2:
                 raise ValueError
-            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) > 2:
+            if "." in self.wp_str.get() and \
+                    len(self.wp_str.get().rsplit(".")[1]) > 2:
                 raise ValueError
-            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) < 2:
+            if "." in self.wp_str.get() and \
+                    len(self.wp_str.get().rsplit(".")[1]) < 2:
                 raise ValueError
         except ValueError:
             tk.messagebox.showerror(title="Invalid Price",
-                                    message="Price (Retail and Wholesale) must be a "
-                                            "floating point number which "
-                                            "does not extend beyond the "
+                                    message="Price (Retail and Wholesale) must"
+                                            " be a floating point number which"
+                                            " does not extend beyond the "
                                             "hundredth place.")
             return
-        # Here we have a valid item to get added (MUST ADD AND SET modifying=false)
+        # Here we have a valid item to get added
+        # (MUST ADD AND SET modifying=false)
         i = self.tree.item(self.cur)
         n = str(self.n_str.get())
         b = str(self.b_str.get())
         q = int(self.q_str.get())
         rp = float(self.rp_str.get())
         wp = float(self.wp_str.get())
-        # need to add checks for updating name/barcode and changing quantity for stats
+        # need to add checks for updating name/barcode and changing
+        # quantity for stats
         if q != int(i["values"][2]):
             Stats.insert_one(
-                {"time": datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+                {"time": datetime.now(), "barcode": b, "quantity": q,
+                 "r_price": rp, "w_price": wp})
         if n != str(i["values"][0]) or b != str(i["values"][1]):
 
             name_update = tk.messagebox.askquestion \
-                ('Unique Update', 'Name/Barcode changed: Update unique correlation?' + n + str(i["values"][0]))
+                ('Unique Update', 'Name/Barcode changed: Update unique'
+                                  ' correlation?' + n + str(i["values"][0]))
             if name_update:
                 barcode_update = False
-                if NameBcode.find_one({"barcode": b}) and b != str(i["values"][1]):
+                if NameBcode.find_one({"barcode": b}) and\
+                        b != str(i["values"][1]):
                     barcode_update = tk.messagebox.askquestion \
-                        ('Barcode Taken', 'Switch or delete barcodes? (Yes for modify, no for Delete)')
+                        ('Barcode Taken', 'Switch or delete barcodes? '
+                                          '(Yes for modify, no for Delete)')
                     if barcode_update:
-                        NameBcode.update_one({"barcode": b}, {"$set": {"barcode": str(i["values"][1])}})
-                        Inventory.update_one({"barcode": b}, {"$set": {"barcode": str(i["values"][1])}})
-                        Stats.update_many({"barcode": b}, {"$set": {"barcode": "placeholder"}})
-                        # Column integer to match the column which was clicked in the table
+                        NameBcode.update_one({"barcode": b},
+                                             {"$set": {"barcode": str(
+                                                 i["values"][1])}})
+                        Inventory.update_one({"barcode": b},
+                                             {"$set": {"barcode": str(
+                                                 i["values"][1])}})
+                        Stats.update_many({"barcode": b},
+                                          {"$set": {"barcode": "placeholder"}})
+                        # Column integer to match the column which was
+                        # clicked in the table
                         entries = self.tree.get_children()
 
-                        for item in entries:  # NEED TO UPDATE VIEW (this does not work)
+                        for item in entries:
                             if str(self.tree.item(item)['values'][1]) == b:
-                                self.tree.item(item)['values'][1] = str(i["values"][1])
+                                self.tree.item(item)['values'][1] = \
+                                    str(i["values"][1])
                                 break
 
                     else:
@@ -792,21 +839,31 @@ class UI(tk.Tk):
                         Inventory.delete_one({"barcode": b})
                         Stats.delete_many({"barcode": b})
 
-                NameBcode.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b}})
-                Inventory.update_one({"name": str(i["values"][0])}, {"$set": {"name": n, "barcode": b,
-                                                                              "quantity": q, "r_price": rp,
-                                                                              "w_price": wp}})
-                Stats.update_many({"barcode": str(i["values"][1])}, {"$set": {"barcode": b}})
+                NameBcode.update_one({"name": str(i["values"][0])},
+                                     {"$set": {"name": n, "barcode": b}})
+                Inventory.update_one({"name": str(i["values"][0])},
+                                     {"$set": {"name": n, "barcode": b,
+                                               "quantity": q, "r_price": rp,
+                                               "w_price": wp}})
+                Stats.update_many({"barcode": str(i["values"][1])},
+                                  {"$set": {"barcode": b}})
                 if barcode_update:
-                    Stats.update_many({"barcode": "placeholder"}, {"$set": {"barcode": str(i["values"][1])}})
+                    Stats.update_many({"barcode": "placeholder"},
+                                      {"$set": {"barcode":
+                                                    str(i["values"][1])}})
         Inventory.update_one({"name": str(i["values"][0]),
-                              "barcode": str(i["values"][1])}, {"$set": {"name": n, "barcode": b,
-                                                                         "quantity": q, "r_price": rp, "w_price": wp}})
-        self.tree.item(self.cur, values=(n, b, str(q), '$' + "{:.2f}".format(rp), '$' + "{:.2f}".format(wp)))
+                              "barcode": str(i["values"][1])},
+                             {"$set": {"name": n, "barcode": b,
+                                       "quantity": q, "r_price": rp,
+                                       "w_price": wp}})
+        self.tree.item(self.cur, values=(n, b, str(q),
+                                         '$' + "{:.2f}".format(rp),
+                                         '$' + "{:.2f}".format(wp)))
         self.modifying = False
         self.disable_modifications()
         tk.messagebox.showinfo(title="Item Update",
-                               message="Item : " + self.n_str.get() + " has been updated.")
+                               message="Item : " + self.n_str.get() +
+                                       " has been updated.")
 
     # Called when user want to modify something
     def enable_modifications(self):
@@ -867,7 +924,9 @@ class UI(tk.Tk):
         # self.withdraw()
         # This is where we must open new window to add Inventory DB
         # expd = ExportData(self)
-        directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
+        directory = tk.filedialog.askdirectory(initialdir="/",
+                                               title='Please select a '
+                                                     'directory for Export')
         if directory:
             filename = None
             popup = tk.Tk()
@@ -887,13 +946,17 @@ class UI(tk.Tk):
                 path = directory + "/" + filename + ".xlsx"
                 if os.path.exists(path):
                     MsgBox = tk.messagebox.askquestion('File Exists',
-                                                       'File exists. Would you like to overwrite the file?',
+                                                       'File exists. Would '
+                                                       'you like to overwrite '
+                                                       'the file?',
                                                        icon='warning')
                     if MsgBox == 'yes':
                         try:
                             os.remove(path)
                         except:
-                            tk.messagebox.showerror('Error', 'Error replacing file: File in use.')
+                            tk.messagebox.showerror('Error', 'Error replacing '
+                                                             'file: File in '
+                                                             'use.')
                             return
                     else:
                         return
@@ -911,7 +974,8 @@ class UI(tk.Tk):
                 d3.to_excel(writer, sheet_name='Unique Name Barcodes')
                 writer.save()
                 if os.path.exists(path):
-                    tk.messagebox.showinfo('Success!', 'File created successfully.')
+                    tk.messagebox.showinfo('Success!', 'File created '
+                                                       'successfully.')
                 else:
                     tk.messagebox.showerror('Error', 'Error creating file.')
 
@@ -923,20 +987,29 @@ class UI(tk.Tk):
         # self.withdraw()
         # This is where we must open new window to add Inventory DB
         # expd = ExportData(self)
-        directory = tk.filedialog.askdirectory(initialdir="/", title='Please select a directory for Export')
+        directory = tk.filedialog.askdirectory(initialdir="/",
+                                               title='Please select a '
+                                                     'directory for Export')
         if directory:
             path = directory + "/template.xlsx"
             if os.path.exists(path):
                 try:
                     os.remove(path)
                 except:
-                    tk.messagebox.showerror('Error', 'Error remaking file: template.xlsx in use.')
+                    tk.messagebox.showerror('Error', 'Error remaking file: '
+                                                     'template.xlsx in use.')
                     return
                 inv_data = [['NAME', '0000', 0, "0.00", "0.00"]]
-                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00", "0.00"]]
+                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00",
+                              "0.00"]]
                 nbc_data = [['NAME', '0000']]
-                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode', 'quantity', 'r_price', 'w_price'])
-                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode',
+                                                         'quantity', 'r_price',
+                                                         'w_price'])
+                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode',
+                                                          'quantity',
+                                                          'r_price',
+                                                          'w_price'])
                 d3 = pandas.DataFrame(nbc_data, columns=['name', 'barcode'])
                 writer = pandas.ExcelWriter(path, engine='xlsxwriter')
 
@@ -946,10 +1019,16 @@ class UI(tk.Tk):
                 writer.save()
             else:
                 inv_data = [['NAME', '0000', 0, "0.00", "0.00"]]
-                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00", "0.00"]]
+                stat_data = [['YEAR-MO-DA HO:MI:SE.MIS', '0000', 0, "0.00",
+                              "0.00"]]
                 nbc_data = [['NAME', '0000']]
-                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode', 'quantity', 'r_price', 'w_price'])
-                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode', 'quantity', 'r_price', 'w_price'])
+                d1 = pandas.DataFrame(inv_data, columns=['name', 'barcode',
+                                                         'quantity', 'r_price',
+                                                         'w_price'])
+                d2 = pandas.DataFrame(stat_data, columns=['time', 'barcode',
+                                                          'quantity',
+                                                          'r_price',
+                                                          'w_price'])
                 d3 = pandas.DataFrame(nbc_data, columns=['name', 'barcode'])
                 writer = pandas.ExcelWriter(path, engine='xlsxwriter')
 
@@ -958,7 +1037,8 @@ class UI(tk.Tk):
                 d3.to_excel(writer, sheet_name='Unique Name Barcodes')
                 writer.save()
             if os.path.exists(path):
-                tk.messagebox.showinfo('Success!', 'File created successfully.')
+                tk.messagebox.showinfo('Success!',
+                                       'File created successfully.')
             else:
                 tk.messagebox.showerror('Error', 'Error creating file.')
 
@@ -967,13 +1047,16 @@ class UI(tk.Tk):
         # self.withdraw()
         # This is where we must open new window to add Inventory DB
         # expd = ExportData(self)
-        file = tk.filedialog.askopenfilename(initialdir="/", title='Please select a file for Import')
+        file = tk.filedialog.askopenfilename(initialdir="/",
+                                             title='Please select a file for '
+                                                   'Import')
         if file == "":
             return
         try:
             xls = pandas.ExcelFile(file)
         except:
-            tk.messagebox.showerror('Error', 'Error opening file: Not an excel file.')
+            tk.messagebox.showerror('Error', 'Error opening file: '
+                                             'Not an excel file.')
             return
         d1 = xls.parse(xls.sheet_names[0])  # Inventory
         d2 = xls.parse(xls.sheet_names[1])  # Stats
@@ -983,8 +1066,12 @@ class UI(tk.Tk):
         #  return
         if file:
             result = tk.messagebox.askyesnocancel("Data Replacement",
-                                                  "Would you like to replace the database? (select no for append)\n"
-                                                  "(Note: Make sure the file is formatted like the export file)")
+                                                  "Would you like to replace "
+                                                  "the database? (select no "
+                                                  "for append)\n"
+                                                  "(Note: Make sure the file "
+                                                  "is formatted like the export"
+                                                  " file)")
             # Above is temporary until i can make my own message box
             if result is True:
                 d1 = d1.reset_index()
@@ -998,27 +1085,38 @@ class UI(tk.Tk):
                         r = float(row["r_price"])
                         w = float(row["w_price"])
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Inventory sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Inventory sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                 for index, row in d2.iterrows():
                     try:
-                        t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                        t = datetime.strptime(row["time"],
+                                              '%Y-%m-%d %H:%M:%S.%f')
                         b = row["barcode"]
                         q = int(row["quantity"])
                         r = float(row["r_price"])
                         w = float(row["w_price"])
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Statistics sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error '
+                                                         'converting file: '
+                                                         'Statistics sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                 for index, row in d3.iterrows():
                     try:
                         n = row["name"]
                         b = row["barcode"]
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error '
+                                                         'converting file: '
+                                                         'Unique '
+                                                         'Name Barcodes sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
 
                 Inventory.delete_many({})
@@ -1029,30 +1127,48 @@ class UI(tk.Tk):
                 d3 = d3.reset_index()
                 for index, row in d1.iterrows():
                     try:
-                        Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
-                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
-                                              "w_price": float(row["w_price"])})
+                        Inventory.insert_one({"name": row["name"],
+                                              "barcode": row["barcode"],
+                                              "quantity": int(row["quantity"]),
+                                              "r_price": float(row["r_price"]),
+                                              "w_price":
+                                                  float(row["w_price"])})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Inventory sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error '
+                                                         'converting file: '
+                                                         'Inventory sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                 for index, row in d2.iterrows():
-                    dt_obj = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                    dt_obj = datetime.strptime(row["time"],
+                                               '%Y-%m-%d %H:%M:%S.%f')
                     try:
-                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": int(row["quantity"]),
-                                          "r_price": float(row["r_price"]), "w_price": float(row["w_price"])})
+                        Stats.insert_one({"time": dt_obj,
+                                          "barcode": row["barcode"],
+                                          "quantity": int(row["quantity"]),
+                                          "r_price": float(row["r_price"]),
+                                          "w_price": float(row["w_price"])})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Statistics sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error '
+                                                         'converting file: '
+                                                         'Statistics '
+                                                         'sheet formatted '
+                                                         'improperly.')
                         return
                 for index, row in d3.iterrows():
                     try:
-                        NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                        NameBcode.insert_one({"name": row["name"],
+                                              "barcode": row["barcode"]})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Unique Name Barcodes '
+                                                         'sheet formatted'
+                                                         ' improperly.')
                         return
-                tk.messagebox.showinfo('Success!', 'Database written successfully.')
+                tk.messagebox.showinfo('Success!', 'Database written '
+                                                   'successfully.')
 
             elif result is False:
                 d1 = d1.reset_index()
@@ -1066,27 +1182,37 @@ class UI(tk.Tk):
                         r = float(row["r_price"])
                         w = float(row["w_price"])
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Inventory sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Inventory sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                 for index, row in d2.iterrows():
                     try:
-                        t = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                        t = datetime.strptime(row["time"],
+                                              '%Y-%m-%d %H:%M:%S.%f')
                         b = row["barcode"]
                         q = int(row["quantity"])
                         r = float(row["r_price"])
                         w = float(row["w_price"])
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Statistics sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Statistics sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                 for index, row in d3.iterrows():
                     try:
                         n = row["name"]
                         b = row["barcode"]
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Unique Name Barcodes'
+                                                         ' sheet formatted'
+                                                         ' improperly.')
                         return
                 d1 = d1.reset_index()
                 d2 = d2.reset_index()
@@ -1095,48 +1221,76 @@ class UI(tk.Tk):
                     name = NameBcode.find_one({"name": row["name"]})
                     code = NameBcode.find_one({"barcode": row["barcode"]})
                     if name or code:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Unique barcode' + row["name"] + ': '
-                                                + row["barcode"] + ' already used.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Unique barcode' +
+                                                row["name"] + ': '
+                                                + row["barcode"] +
+                                                ' already used.')
                         return
 
                 for index, row in d2.iterrows():
                     try:
-                        dt_obj = datetime.strptime(row["time"], '%Y-%m-%d %H:%M:%S.%f')
+                        dt_obj = datetime.strptime(row["time"],
+                                                   '%Y-%m-%d %H:%M:%S.%f')
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: Times formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: Times '
+                                                         'formatted '
+                                                         'improperly.')
                         return
                     try:
-                        Stats.insert_one({"time": dt_obj, "barcode": row["barcode"], "quantity": int(row["quantity"]),
-                                          "r_price": float(row["r_price"]), "w_price": float(row["w_price"])})
+                        Stats.insert_one({"time": dt_obj, "barcode":
+                            row["barcode"], "quantity": int(row["quantity"]),
+                                          "r_price": float(row["r_price"]),
+                                          "w_price": float(row["w_price"])})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Statistics sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Statistics sheet '
+                                                         'formatted'
+                                                         ' improperly.')
                         return
                 for index, row in d3.iterrows():
                     try:
-                        NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                        NameBcode.insert_one({"name": row["name"],
+                                              "barcode": row["barcode"]})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Unique Name Barcodes sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Unique Name Barcodes'
+                                                         ' sheet formatted '
+                                                         'improperly.')
                         return
                 for index, row in d1.iterrows():
                     try:
-                        Inventory.insert_one({"name": row["name"], "barcode": row["barcode"],
-                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
-                                              "w_price": float(row["w_price"])})
+                        Inventory.insert_one({"name": row["name"],
+                                              "barcode": row["barcode"],
+                                              "quantity": int(row["quantity"]),
+                                              "r_price": float(row["r_price"]),
+                                              "w_price":
+                                                  float(row["w_price"])})
                         if not Stats.find_one({"barcode": row["barcode"]}):
-                            Stats.insert_one({"time": datetime.now(), "barcode": row["barcode"],
-                                              "quantity": int(row["quantity"]), "r_price": float(row["r_price"]),
-                                              "w_price": float(row["w_price"])})
-                        if not NameBcode.find_one(row["barcode"]) or not NameBcode.find_one(row["name"]):
-                            NameBcode.insert_one({"name": row["name"], "barcode": row["barcode"]})
+                            Stats.insert_one({"time": datetime.now(),
+                                              "barcode": row["barcode"],
+                                              "quantity": int(row["quantity"]),
+                                              "r_price": float(row["r_price"]),
+                                              "w_price":
+                                                  float(row["w_price"])})
+                        if not NameBcode.find_one(row["barcode"]) or not \
+                                NameBcode.find_one(row["name"]):
+                            NameBcode.insert_one({"name": row["name"],
+                                                  "barcode": row["barcode"]})
                     except:
-                        tk.messagebox.showerror('Error', 'Error converting file: '
-                                                         'Inventory sheet formatted improperly.')
+                        tk.messagebox.showerror('Error', 'Error converting '
+                                                         'file: '
+                                                         'Inventory sheet '
+                                                         'formatted '
+                                                         'improperly.')
                         return
 
-                tk.messagebox.showinfo('Success!', 'Database written successfully.')
+                tk.messagebox.showinfo('Success!', 'Database written '
+                                                   'successfully.')
 
             elif result is None:
                 print("cancel")
@@ -1147,32 +1301,7 @@ class UI(tk.Tk):
         exit()
 
 
-# Testing Data
-head = ["Name", "Barcode", "Quantity", "r_price", "w_price"]
-test_entries = [
-    ("Name1", "Barcode1", "Quantity1", "rPrice1", "wPrice1"),
-    ("Name2", "Barcode2", "Quantity2", "rPrice2", "wPrice2"),
-    ("Name3", "Barcode3", "Quantity3", "rPrice3", "wPrice3"),
-    ("Name4", "Barcode4", "Quantity4", "rPrice4", "wPrice4"),
-    ("Name5", "Barcode5", "Quantity5", "rPrice5", "wPrice5"),
-    ("Name6", "Barcode6", "Quantity6", "rPrice6", "wPrice6"),
-    ("Name7", "Barcode7", "Quantity7", "rPrice7", "wPrice7"),
-    ("Name8", "Barcode8", "Quantity8", "rPrice8", "wPrice8"),
-    ("Name9", "Barcode9", "Quantity9", "rPrice9", "wPrice9"),
-    ("Name10", "Barcode10", "Quantity10", "rPrice10", "wPrice10"),
-    ("Name1", "Barcode1", "Quantity1", "rPrice1", "wPrice1"),
-    ("Name2", "Barcode2", "Quantity2", "rPrice2", "wPrice2"),
-    ("Name3", "Barcode3", "Quantity3", "rPrice3", "wPrice3"),
-    ("Name4", "Barcode4", "Quantity4", "rPrice4", "wPrice4"),
-    ("Name5", "Barcode5", "Quantity5", "rPrice5", "wPrice5"),
-    ("Name6", "Barcode6", "Quantity6", "rPrice6", "wPrice6"),
-    ("Name7", "Barcode7", "Quantity7", "rPrice7", "wPrice7"),
-    ("Name8", "Barcode8", "Quantity8", "rPrice8", "wPrice8"),
-    ("Name9", "Barcode9", "Quantity9", "rPrice9", "wPrice9"),
-    ("Name10", "Barcode10", "Quantity10", "rPrice10", "wPrice10")
-]
-
-
+# Add new item to db window
 class AddNew(tk.Tk):
     def __init__(self, mas, super_mas):
         super().__init__()
@@ -1204,15 +1333,20 @@ class AddNew(tk.Tk):
         t_lbl.grid(row=0, column=1, rowspan=2, columnspan=3, pady=15, sticky=W)
 
         # Create 4 labels for entry boxes
-        n_lbl = Label(b_frame, text="Name >", font=("Helvetica", 11), bg="#d0fbff")
+        n_lbl = Label(b_frame, text="Name >", font=("Helvetica", 11),
+                      bg="#d0fbff")
         n_lbl.grid(row=2, column=0, sticky=E)
-        b_lbl = Label(b_frame, text="Barcode >", font=("Helvetica", 11), bg="#d0fbff")
+        b_lbl = Label(b_frame, text="Barcode >", font=("Helvetica", 11),
+                      bg="#d0fbff")
         b_lbl.grid(row=5, column=0, sticky=E)
-        q_lbl = Label(b_frame, text="Quantity >", font=("Helvetica", 11), bg="#d0fbff")
+        q_lbl = Label(b_frame, text="Quantity >", font=("Helvetica", 11),
+                      bg="#d0fbff")
         q_lbl.grid(row=8, column=0, sticky=E)
-        rp_lbl = Label(b_frame, text="Retail Price >", font=("Helvetica", 11), bg="#d0fbff")
+        rp_lbl = Label(b_frame, text="Retail Price >", font=("Helvetica",
+                                                             11), bg="#d0fbff")
         rp_lbl.grid(row=11, column=0, sticky=E)
-        wp_lbl = Label(b_frame, text="Wholesale Price >", font=("Helvetica", 11), bg="#d0fbff")
+        wp_lbl = Label(b_frame, text="Wholesale Price >",
+                       font=("Helvetica", 11), bg="#d0fbff")
         wp_lbl.grid(row=14, column=0, sticky=E)
 
         # Every time any entry text is changed,
@@ -1223,7 +1357,8 @@ class AddNew(tk.Tk):
         self.rp_str.trace("w", self.ok_to_add)
         self.wp_str.trace("w", self.ok_to_add)
 
-        # Creating 5 entry boxes (Name - Barcode - Quantity - Retail Price - Wholesale Price)
+        # Creating 5 entry boxes
+        # (Name - Barcode - Quantity - Retail Price - Wholesale Price)
         n_entry = Entry(b_frame, textvariable=self.n_str)
         n_entry.grid(row=2, column=1, columnspan=4, pady=15)
         b_entry = Entry(b_frame, textvariable=self.b_str)
@@ -1236,11 +1371,15 @@ class AddNew(tk.Tk):
         wp_entry.grid(row=14, column=1, columnspan=4, pady=15)
 
         # Add button border
-        add_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
-        add_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        add_border = Frame(b_frame, highlightthickness=2,
+                           highlightbackground="#37d3ff")
+        add_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10,
+                        padx=15, sticky=W)
         # Go Back button border
-        back_border = Frame(b_frame, highlightthickness=2, highlightbackground="#d10000")
-        back_border.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+        back_border = Frame(b_frame, highlightthickness=2,
+                            highlightbackground="#d10000")
+        back_border.grid(row=17, column=4, columnspan=2, rowspan=2,
+                         pady=10, sticky=E)
 
         # Add Item Button
         self.a_butt = Button(add_border, text="Add Item",
@@ -1271,37 +1410,50 @@ class AddNew(tk.Tk):
             nameF = tk.messagebox.askquestion \
                 ('Name Found', 'Entry with name ' + n + ' found. Update it?')
             if nameF:
-                Inventory.update_one({"name": n}, {"$set": {"name": n, "barcode": b,
+                Inventory.update_one({"name": n}, {"$set": {"name": n,
+                                                            "barcode": b,
                                                             "quantity": q,
-                                                            "r_price": rp, "w_price": wp}})
+                                                            "r_price": rp,
+                                                            "w_price": wp}})
         y = Inventory.find_one({"barcode": b})
         if y and not x:
             nameB = tk.messagebox.askquestion \
-                ('Barcode Found', 'Entry with barcode ' + b + ' found. Update it?')
+                ('Barcode Found', 'Entry with barcode ' + b + ' found. '
+                                                              'Update it?')
             if nameB:
-                Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b,
+                Inventory.update_one({"barcode": b}, {"$set": {"name": n,
+                                                               "barcode": b,
                                                                "quantity": q,
-                                                               "r_price": rp, "w_price": wp}})
+                                                               "r_price": rp,
+                                                               "w_price": wp}})
         z = NameBcode.find_one({"barcode": b})
         if not z:
             nameBU = tk.messagebox.askquestion \
-                ('Unique Barcode Found', 'Unique barcode found. Update unique database?')
+                ('Unique Barcode Found', 'Unique barcode found. Update unique'
+                                         ' database?')
             if nameBU:
                 NameBcode.insert_one({"name": n, "barcode": b})
         else:
             if z["name"] != n:
                 nameBA = tk.messagebox.askquestion \
                     ('Unique Barcode Already Used',
-                     'Unique barcode already used. Update unique and statistics database?')
+                     'Unique barcode already used. Update unique and '
+                     'statistics database?')
                 if nameBA:
-                    NameBcode.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b}})
+                    NameBcode.update_one({"barcode": b},
+                                         {"$set": {"name": n, "barcode": b}})
                     Stats.delete_many({"barcode": b})
-                    Inventory.update_one({"barcode": b}, {"$set": {"name": n, "barcode": b, "quantity": q,
-                                                                   "r_price": rp, "w_price": wp}})
+                    Inventory.update_one({"barcode": b},
+                                         {"$set": {"name": n, "barcode": b,
+                                                   "quantity": q,
+                                                   "r_price": rp,
+                                                   "w_price": wp}})
         if not x and not y:
-            Inventory.insert_one({"name": n, "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+            Inventory.insert_one({"name": n, "barcode": b, "quantity": q,
+                                  "r_price": rp, "w_price": wp})
 
-        Stats.insert_one({"time": datetime.now(), "barcode": b, "quantity": q, "r_price": rp, "w_price": wp})
+        Stats.insert_one({"time": datetime.now(), "barcode": b, "quantity": q,
+                          "r_price": rp, "w_price": wp})
 
         tk.messagebox.showinfo(
             title='Success',
@@ -1315,27 +1467,37 @@ class AddNew(tk.Tk):
 
     # Callback function for add item button
     def db_add(self):
-        # Check that barcode==int && quantity==int && price==float (With at most 2 decimal places)
+        # Check that barcode==int && quantity==int && price==float
+        # (With at most 2 decimal places)
         if not self.b_str.get().isdigit():
-            tk.messagebox.showerror(title="Invalid Barcode", message="Barcode must be comprised of only integers.")
+            tk.messagebox.showerror(title="Invalid Barcode",
+                                    message="Barcode must be comprised of only"
+                                            " integers.")
             return
         if not self.q_str.get().isdigit():
-            tk.messagebox.showerror(title="Invalid Quantity", message="Quantity must be a whole integer.")
+            tk.messagebox.showerror(title="Invalid Quantity",
+                                    message="Quantity must be a whole "
+                                            "integer.")
             return
         try:
             float(self.rp_str.get())
             float(self.wp_str.get())
-            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) > 2:
+            if "." in self.rp_str.get() and \
+                    len(self.rp_str.get().rsplit(".")[1]) > 2:
                 raise ValueError
-            if "." in self.rp_str.get() and len(self.rp_str.get().rsplit(".")[1]) < 2:
+            if "." in self.rp_str.get() and \
+                    len(self.rp_str.get().rsplit(".")[1]) < 2:
                 raise ValueError
-            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) > 2:
+            if "." in self.wp_str.get() and \
+                    len(self.wp_str.get().rsplit(".")[1]) > 2:
                 raise ValueError
-            if "." in self.wp_str.get() and len(self.wp_str.get().rsplit(".")[1]) < 2:
+            if "." in self.wp_str.get() and \
+                    len(self.wp_str.get().rsplit(".")[1]) < 2:
                 raise ValueError
         except ValueError:
             tk.messagebox.showerror(title="Invalid Price",
-                                    message="Price (Retail and Wholesale) must be a "
+                                    message="Price (Retail and Wholesale) must"
+                                            " be a "
                                             "floating point number which "
                                             "does not extend beyond the "
                                             "hundredth place.")
@@ -1345,7 +1507,8 @@ class AddNew(tk.Tk):
 
     # Callback function for add item button
     def ok_to_add(self, var, index, mode):
-        if self.n_str.get() and self.b_str.get() and self.q_str.get() and self.rp_str.get() and self.wp_str.get():
+        if self.n_str.get() and self.b_str.get() and self.q_str.get() and \
+                self.rp_str.get() and self.wp_str.get():
             self.a_butt.config(state="normal")
         else:
             self.a_butt.config(state="disabled")
@@ -1381,14 +1544,20 @@ class GraphMenu(tk.Tk):
                       bg="#d0fbff")
         t_lbl.grid(row=0, column=1, rowspan=2, columnspan=3, pady=15, sticky=W)
         # Stock button border
-        s_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
-        s_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        s_border = Frame(b_frame, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        s_border.grid(row=17, column=0, columnspan=2, rowspan=2, pady=10,
+                      padx=15, sticky=W)
         # Profit Graph Button
-        p_border = Frame(b_frame, highlightthickness=2, highlightbackground="#37d3ff")
-        p_border.grid(row=17, column=2, columnspan=2, rowspan=2, pady=10, padx=15, sticky=W)
+        p_border = Frame(b_frame, highlightthickness=2,
+                         highlightbackground="#37d3ff")
+        p_border.grid(row=17, column=2, columnspan=2, rowspan=2, pady=10,
+                      padx=15, sticky=W)
         # Go Back button border
-        back_border = Frame(b_frame, highlightthickness=2, highlightbackground="#d10000")
-        back_border.grid(row=17, column=4, columnspan=2, rowspan=2, pady=10, sticky=E)
+        back_border = Frame(b_frame, highlightthickness=2,
+                            highlightbackground="#d10000")
+        back_border.grid(row=17, column=4, columnspan=2, rowspan=2,
+                         pady=10, sticky=E)
 
         # Stock Item Button
         self.s_butt = Button(s_border, text="Stock Graph",
@@ -1436,17 +1605,23 @@ class GraphMenu(tk.Tk):
                                 day=cal_day.day)
 
         calender.pack(pady=20)
-        label = ttk.Label(self.popup_c, text="Select a starting date for the graph.")
+        label = ttk.Label(self.popup_c, text="Select a starting date for the"
+                                             " graph.")
         label.pack(side="top", fill="x", pady=10)
         if typeA == 1:
             b1 = ttk.Button(self.popup_c, text="Submit",
-                            command=lambda: self.show_graph(calender.get_date(), typeA, typeB, self.sel_barcode))
+                            command=lambda:
+                            self.show_graph(calender.get_date(), typeA, typeB,
+                                            self.sel_barcode))
         else:
             b1 = ttk.Button(self.popup_c, text="Submit",
-                            command=lambda: self.show_graph(calender.get_date(), typeA, typeB, self.sel_barcode))
+                            command=lambda:
+                            self.show_graph(calender.get_date(), typeA, typeB,
+                                            self.sel_barcode))
         b1.pack()
         self.popup_c.mainloop()
 
+    # Function that graphs data from statistics db
     def show_graph(self, day, typeA, typeB, code):
         self.popup_c.destroy()
         self.popup_g = tk.Tk()
@@ -1534,7 +1709,8 @@ class GraphMenu(tk.Tk):
 
                         temp = i["quantity"]
                 fig, ax = plt.subplots()
-                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
+                for x1, x2, y1, y2 in zip(times, times[1:], profits,
+                                          profits[1:]):
                     if y1 > y2:
                         ax.plot([x1, x2], [y1, y2], 'r')
                     elif y1 < y2:
@@ -1547,9 +1723,11 @@ class GraphMenu(tk.Tk):
                 plt.ylabel("Profit")
                 plt.xlabel("Date/Time")
                 if overall >= 0:
-                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
+                    plt.title("Overall Profit: $" + "{:.2f}".format(overall),
+                              color="green")
                 else:
-                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
+                    plt.title("Overall Loss: $" + "{:.2f}".format(overall),
+                              color="red")
                 plt.gcf().autofmt_xdate()
                 plt.grid()
                 # plt.show()
@@ -1577,11 +1755,14 @@ class GraphMenu(tk.Tk):
                             times.append(i["time"].date())
                             change = temp - i["quantity"]
                             if i["quantity"] < temp:
-                                overall_per += float(change) * float(i["r_price"])
-                                overall += float(change) * float(i["r_price"])
+                                overall_per += float(change) * \
+                                               float(i["r_price"])
+                                overall += float(change) * \
+                                           float(i["r_price"])
                                 profits.append(overall)
                             elif i["quantity"] > temp:
-                                overall_per += float(change) * float(i["w_price"])
+                                overall_per += float(change) * \
+                                               float(i["w_price"])
                                 overall += float(change) * float(i["w_price"])
                                 profits.append(overall)
 
@@ -1592,7 +1773,8 @@ class GraphMenu(tk.Tk):
 
                 # print individual values
                 # sort dict
-                sorted_p = {k: v for k, v in sorted(profit_per.items(), key=lambda item: item[1])}
+                sorted_p = {k: v for k, v in sorted(profit_per.items(),
+                                                    key=lambda item: item[1])}
                 out = "Products ordered by value:"
                 title = Label(self.popup_g, text=out, font=("Helvetica", 11),
                               bg="#d0fbff",
@@ -1605,8 +1787,11 @@ class GraphMenu(tk.Tk):
 
                 tree_prof_frame = Frame(self.popup_g, highlightthickness=2,
                                         highlightbackground="#37d3ff")
-                tree_prof_frame.grid(row=3, column=8, columnspan=4, rowspan=15, sticky=EW)
-                tree_prof = ttk.Treeview(tree_prof_frame, columns=["Name", "Profit"], show="headings",
+                tree_prof_frame.grid(row=3, column=8, columnspan=4, rowspan=15,
+                                     sticky=EW)
+                tree_prof = ttk.Treeview(tree_prof_frame,
+                                         columns=["Name", "Profit"],
+                                         show="headings",
                                          height=15)
                 tree_prof.grid_rowconfigure(0, weight=1)
                 tree_prof.grid_columnconfigure(0, weight=1)
@@ -1618,14 +1803,16 @@ class GraphMenu(tk.Tk):
                 # Define heading's text
                 tree_prof.heading("Name", text="Name")
                 tree_prof.heading("Profit", text="Profit")
-                tree_prof.grid(row=3, column=8, rowspan=15, columnspan=3, sticky="nsew", pady=5, padx=5)
+                tree_prof.grid(row=3, column=8, rowspan=15, columnspan=3,
+                               sticky="nsew", pady=5, padx=5)
 
                 for key, value in sorted_p.items():
                     v = "{:.2f}".format(value)
                     l = (key, v)
                     tree_prof.insert("", END, values=l)
 
-                scroll_prof = Scrollbar(tree_prof_frame, orient="vertical", command=tree_prof.yview)
+                scroll_prof = Scrollbar(tree_prof_frame, orient="vertical",
+                                        command=tree_prof.yview)
                 scroll_prof.grid(row=3, column=11, rowspan=15, sticky="nse")
                 tree_prof.config(yscrollcommand=scroll_prof.set)
 
@@ -1647,7 +1834,8 @@ class GraphMenu(tk.Tk):
 
                 fig, ax = plt.subplots()
                 # Plotting profits
-                for x1, x2, y1, y2 in zip(times, times[1:], profits, profits[1:]):
+                for x1, x2, y1, y2 in zip(times, times[1:], profits,
+                                          profits[1:]):
                     if y1 > y2:
                         ax.plot([x1, x2], [y1, y2], 'r')
                     elif y1 < y2:
@@ -1660,9 +1848,11 @@ class GraphMenu(tk.Tk):
                 plt.ylabel("Profit")
                 plt.xlabel("Date/Time")
                 if overall >= 0:
-                    plt.title("Overall Profit: $" + "{:.2f}".format(overall), color="green")
+                    plt.title("Overall Profit: $" + "{:.2f}".format(overall),
+                              color="green")
                 else:
-                    plt.title("Overall Loss: $" + "{:.2f}".format(overall), color="red")
+                    plt.title("Overall Loss: $" + "{:.2f}".format(overall),
+                              color="red")
                 plt.gcf().autofmt_xdate()
                 plt.grid()
                 # plt.show()
@@ -1677,8 +1867,10 @@ class GraphMenu(tk.Tk):
                 canvas.get_tk_widget().pack()
                 frame.grid(column=1, row=2, columnspan=6, rowspan=17)
         # Close button border
-        close_bord = Frame(self.popup_g, highlightthickness=2, highlightbackground="#d10000")
-        close_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=EW, padx=25, pady=12)
+        close_bord = Frame(self.popup_g, highlightthickness=2,
+                           highlightbackground="#d10000")
+        close_bord.grid(column=3, row=20, columnspan=2, rowspan=2, sticky=EW,
+                        padx=25, pady=12)
         b1 = Button(close_bord, text="Return to Graph Selection",
                     command=self.close_graph,
                     bg="white",
