@@ -1,4 +1,10 @@
-# Main DB (Inventory) stores data in the format name: string, barcode: string,
+# Final Project main.py
+# 4/22/2022
+# Aaron Peronto
+# Robert Lovern
+# Cory Avrutis
+
+#Main DB (Inventory) stores data in the format name: string, barcode: string,
 # quantity: int, price: float
 # Secondary DB (Stats) stores data in the form: barcode:string, time:datetime,
 # quantity:int
@@ -1886,7 +1892,6 @@ class GraphMenu(tk.Tk):
     def close_graph(self):
         self.deiconify()
         self.popup_g.destroy()
-
 
 
 if __name__ == '__main__':

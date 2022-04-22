@@ -1,5 +1,11 @@
 # CIS-4930-Group
 
+Final Project README.md
+4/22/2022
+Aaron Peronto
+Robert Lovern
+Cory Avrutis
+
 
 Problem Being Solved		       
 =================================
@@ -9,17 +15,22 @@ profit analysis overtime.
 GUI Description
 =================================
 Login Screen : 	- Can create new User (Creates personal DB Collections)
-		- Can login with existing User
-		- Can delete existing User
+			- Can login with existing User
+			- Can delete existing User
+
 Main Window  : 	- Browse Inventory records and make modifications
-		- Add new Item to inventory
-		- Export data to excel spreadsheet / Import data from excel spreadsheet
-		- Create an excel spreadsheet template to be edited/imported
-		- Can Graph the Current Selected Item / Graph All Items
+			- Add new Item to inventory
+			- Export data to excel spreadsheet / Import data from excel spreadsheet
+			- Create an excel spreadsheet template to be edited/imported
+			- Can Graph the Current Selected Item / Graph All Items
+
 Graph Window : 	- Graph Stock Changes / Graph Calculated Profit  (Both based off quantity changes)
 
-Notes :	- When trying to run the database on FSU's internet, we realized a VPN is required.
-		- A login for testing used by us was: Username: test1 Password: test1
+
+Incstructions for Running
+=================================
+- When trying to run the database on FSU's internet, we realized a VPN is required.
+- A login for testing used by us was: Username: test1, Password: test1.
 
 
 Final List of Libraries Used		
@@ -34,6 +45,8 @@ Final List of Libraries Used
 -tkcalendar
 -numpy
 -pandas
+-xlsxwriter
+-openpyxl
 -bcrypt
 
 
@@ -45,27 +58,27 @@ No other resources were used.
 Separation of Work	
 =================================
 Aaron Peronto
-	- Developed entire User login system.
+		- Developed entire User login system.
 		- Login GUI Design
 		- Individual user collection creation
 		- Maintain correct collection in main inventory GUI
 
 Robert Lovern 
-	- Managed/Created most of the code interacting directly with DB collections
-	- Handled statistical analysis of user's DB information
+		- Managed/Created most of the code interacting directly with DB collections
+		- Handled statistical analysis of user's DB information
 		- Logic to calculate Stock/Profit changes 
 		- Used these statistics to plot on Graph
-	- Handled graph generation
+		- Handled graph generation
 
 Cory Avrutis
-	- Handled design layout for GUI
-	- Oversaw the structuring of GUI code
+		- Handled design layout for GUI
+		- Oversaw the structuring of GUI code
 		- Organized via Object-Oriented approach
-	- Visualized and implemented all necessary graphical changes when required
+		- Visualized and implemented all necessary graphical changes when required
 		- Widget Placement / Functionality / Type  
-	- Managed the interaction of widgets with actual DB operations
+		- Managed the interaction of widgets with actual DB operations
 		- DB operation logic ported from Robert's implementation
-	- Assisted in user password hashing
+		- Assisted in user password hashing
 
 
 Extra Features from Proposal	
