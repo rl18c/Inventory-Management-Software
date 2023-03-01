@@ -1,4 +1,4 @@
-# CIS-4930-Group
+# Inventory Management Software
 
 Final Project README.md
 4/22/2022
